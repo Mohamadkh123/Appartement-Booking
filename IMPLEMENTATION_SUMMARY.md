@@ -75,6 +75,7 @@ This document summarizes the implementation of a comprehensive apartment booking
 #### Booking Management
 - Owner approval/rejection
 - User cancellation
+- User modification of booking details (dates)
 - Status workflow management
 
 ### Phase 5: Interactivity & Chat
@@ -102,6 +103,13 @@ This document summarizes the implementation of a comprehensive apartment booking
 - Apartment counts by status
 - Booking statistics
 - Revenue tracking
+
+#### Wallet Management
+- Deposit money to tenant wallets
+- Withdraw money from renter wallets
+- View wallet balances
+- Renter withdrawal requests
+- Admin approval of withdrawal requests
 
 ### Phase 7: Testing & Optimization
 
@@ -165,6 +173,7 @@ This document summarizes the implementation of a comprehensive apartment booking
 - GET /api/bookings
 - GET /api/bookings/{id}
 - PUT /api/bookings/{id}
+- PUT /api/bookings/{id}/details
 - POST /api/bookings/{id}/cancel
 - GET /api/my-bookings
 
@@ -180,6 +189,15 @@ This document summarizes the implementation of a comprehensive apartment booking
 - POST /api/messages/send
 - GET /api/messages/inbox
 - GET /api/messages/conversation/{user_id}
+
+### Wallet Endpoints
+- GET /api/wallet/balance/{user_id}
+- POST /api/admin/wallet/deposit/{user_id}
+- POST /api/admin/wallet/withdraw/{user_id}
+- POST /api/wallet/withdrawal-request
+- GET /api/admin/wallet/withdrawal-requests
+- POST /api/admin/wallet/withdrawal-requests/{request_id}/approve
+- POST /api/admin/wallet/withdrawal-requests/{request_id}/reject
 
 ### Admin Endpoints
 - GET /api/admin/users/pending

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\Wallet;
 
 class User extends Authenticatable
 {
@@ -17,7 +18,9 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name',
+        'first_name',
+        'last_name',
+        'date_of_birth',
         'email',
         'password',
         'role',
@@ -153,5 +156,21 @@ class User extends Authenticatable
     public function receivedMessages()
     {
         return $this->hasMany(Message::class, 'receiver_id');
+    }
+
+    
+      
+     
+    public function wallet()
+    {
+        return $this->hasOne(Wallet::class);
+    }
+
+    
+      
+     
+    public function withdrawalRequests()
+    {
+        return $this->hasMany(WithdrawalRequest::class, 'renter_id');
     }
 }

@@ -33,7 +33,7 @@ class ApartmentFactory extends Factory
             'city' => fake()->randomElement($cities),
             'features' => $selectedFeatures,
             'owner_id' => User::where('role', 'renter')->inRandomOrder()->first()->id ?? User::factory()->create(['role' => 'renter'])->id,
-            'status' => fake()->randomElement(['available', 'booked', 'maintenance'])
+            'status' => fake()->randomElement(['available', 'booked'])
         ];
     }
 }

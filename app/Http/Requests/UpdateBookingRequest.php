@@ -6,14 +6,16 @@ use Illuminate\Foundation\Http\FormRequest;
 use App\Models\Booking;
 use Carbon\Carbon;
 
-class StoreBookingRequest extends FormRequest
+class UpdateBookingRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return true; // All authenticated users can book
+        // Only the booking owner can update their booking
+        $booking = $this->route('booking');
+        return $booking && $this->user()->id === $booking->user_id;
     }
 
     /**
@@ -24,9 +26,8 @@ class StoreBookingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'apartment_id' => 'required|exists:apartments,id',
-            'start_date' => 'required|date|after:today',
-            'end_date' => 'required|date|after:start_date'
+            'start_date' => 'sometimes|date|after:today',
+            'end_date' => 'sometimes|date|after:start_date',
         ];
     }
 
@@ -43,11 +44,6 @@ class StoreBookingRequest extends FormRequest
             if ($this->isOverlapping()) {
                 $validator->errors()->add('start_date', 'The selected dates overlap with an existing booking.');
             }
-            
-            // Check if apartment is available for booking
-            if ($this->apartment_id && !$this->isApartmentAvailable()) {
-                $validator->errors()->add('apartment_id', 'The selected apartment is not available for booking.');
-            }
         });
     }
 
@@ -56,7 +52,9 @@ class StoreBookingRequest extends FormRequest
      */
     private function isOverlapping(): bool
     {
-        if (!$this->start_date || !$this->end_date || !$this->apartment_id) {
+        $booking = $this->route('booking');
+        
+        if (!$this->start_date || !$this->end_date || !$booking) {
             return false;
         }
 
@@ -64,8 +62,10 @@ class StoreBookingRequest extends FormRequest
         $endDate = Carbon::parse($this->end_date);
 
         // Check for overlapping bookings (include pending bookings to prevent conflicts)
-        $overlappingBookings = Booking::where('apartment_id', $this->apartment_id)
+        // Exclude the current booking from the check
+        $overlappingBookings = Booking::where('apartment_id', $booking->apartment_id)
             ->whereIn('status', ['pending', 'confirmed'])
+            ->where('id', '!=', $booking->id)
             ->where(function ($query) use ($startDate, $endDate) {
                 $query->whereBetween('start_date', [$startDate, $endDate])
                     ->orWhereBetween('end_date', [$startDate, $endDate])
@@ -77,39 +77,5 @@ class StoreBookingRequest extends FormRequest
             ->exists();
 
         return $overlappingBookings;
-    }
-
-    /**
-     * Check if the apartment is available for booking
-     */
-    private function isApartmentAvailable(): bool
-    {
-        if (!$this->apartment_id) {
-            return false;
-        }
-
-        $apartment = \App\Models\Apartment::find($this->apartment_id);
-        
-        // Apartment must exist and be available
-        return $apartment && $apartment->status === 'available';
-    }
-
-    /**
-     * Get the error messages for the defined validation rules.
-     *
-     * @return array<string, string>
-     */
-    public function messages(): array
-    {
-        return [
-            'apartment_id.required' => 'Apartment is required',
-            'apartment_id.exists' => 'Selected apartment does not exist',
-            'start_date.required' => 'Start date is required',
-            'start_date.date' => 'Start date must be a valid date',
-            'start_date.after' => 'Start date must be in the future',
-            'end_date.required' => 'End date is required',
-            'end_date.date' => 'End date must be a valid date',
-            'end_date.after' => 'End date must be after start date'
-        ];
     }
 }

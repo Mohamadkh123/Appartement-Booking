@@ -11,23 +11,32 @@ use Illuminate\Support\Facades\App;
   
 class BaseController extends Controller
 {
-    
+    /**
+     * success response method.
+     *
+     * @return \Illuminate\Http\Response
+     */
     public function sendResponse($result, $message): JsonResponse
     {
         $response = [
+            'success' => true,
+            'data'    => $result,
             'message' => __($message),
-            'data'    => $result
-            
         ];
   
         return response()->json($response, 200);
     }
   
-   
+   /**
+     * return error response.
+     *
+     * @return \Illuminate\Http\Response
+     */
     public function sendError($error, $errorMessages = []): JsonResponse
     {
         $response = [
-            'message' => __($error)
+            'success' => false,
+            'message' => __($error),
         ];
   
         if(!empty($errorMessages)){
@@ -38,12 +47,14 @@ class BaseController extends Controller
     }
 
       
+     //Send paginated response
      
     public function sendPaginatedResponse($paginator, $message = ''): JsonResponse
     {
         $response = [
-            'message' => __($message),
+            'success' => true,
             'data' => $paginator->items(),
+            'message' => __($message),
             'pagination' => [
                 'current_page' => $paginator->currentPage(),
                 'last_page' => $paginator->lastPage(),

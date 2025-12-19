@@ -107,7 +107,7 @@ Fields:
 - province (optional)
 - city (optional)
 - features (optional, array)
-- status (optional, available|booked|maintenance)
+- status (optional, available|booked)
 
 #### Delete Apartment (Owner or Admin only)
 ```
@@ -135,6 +135,15 @@ Fields:
 - start_date (required, future date)
 - end_date (required, after start_date)
 
+Conflict Prevention:
+- The system prevents booking conflicts by checking for overlapping dates with existing bookings (both pending and confirmed)
+- Apartments in maintenance status cannot be booked
+- Each booking creates a pending reservation that requires owner approval
+
+Response:
+- Returns booking details with pending status
+- Total price is automatically calculated based on nightly rate and stay duration
+
 #### List Bookings
 ```
 GET /bookings
@@ -160,6 +169,16 @@ Fields:
 ```
 POST /bookings/{id}/cancel
 ```
+
+#### Update Booking Details (Booking user only)
+```
+PUT /bookings/{id}/details
+```
+Fields:
+- start_date (optional, future date)
+- end_date (optional, after start_date)
+
+Note: Only pending bookings can be modified. The system will automatically recalculate the total price based on the new dates.
 
 #### My Bookings
 ```
@@ -228,6 +247,49 @@ GET /messages/inbox
 GET /messages/conversation/{user_id}
 ```
 
+### Wallet
+
+#### Get Wallet Balance
+```
+GET /wallet/balance/{user_id}
+```
+
+#### Deposit to Tenant Wallet (Admin only)
+```
+POST /admin/wallet/deposit/{user_id}
+```
+Fields:
+- amount (required, numeric, minimum 0.01)
+
+#### Withdraw from Renter Wallet (Admin only)
+```
+POST /admin/wallet/withdraw/{user_id}
+```
+Fields:
+- amount (required, numeric, minimum 0.01)
+
+#### Request Withdrawal (Renter only)
+```
+POST /wallet/withdrawal-request
+```
+Fields:
+- amount (required, numeric, minimum 0.01)
+
+#### List Withdrawal Requests (Admin only)
+```
+GET /admin/wallet/withdrawal-requests
+```
+
+#### Approve Withdrawal Request (Admin only)
+```
+POST /admin/wallet/withdrawal-requests/{request_id}/approve
+```
+
+#### Reject Withdrawal Request (Admin only)
+```
+POST /admin/wallet/withdrawal-requests/{request_id}/reject
+```
+
 ### Admin
 
 #### Get Pending Users
@@ -266,7 +328,6 @@ GET /admin/statistics
 ### Apartment Status
 - available: Available for booking
 - booked: Currently booked
-- maintenance: Under maintenance
 
 ### Booking Status
 - pending: Waiting for owner approval
@@ -275,11 +336,17 @@ GET /admin/statistics
 - cancelled: Cancelled by user
 - completed: Booking period has passed
 
+### Wallet
+- balance: Current wallet balance
+- deposit: Money added to tenant's wallet by admin
+- withdrawal: Money withdrawn from renter's wallet by admin
+
 ## Features
 - User registration with ID verification
 - Multi-language support (English/Arabic)
 - Apartment listing with filtering
-- Booking system with availability checking
+- Advanced booking system with conflict prevention
+- Overlapping date detection for all active bookings
 - Review system
 - Messaging between users
 - Admin panel for user management
