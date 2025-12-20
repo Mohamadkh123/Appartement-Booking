@@ -19,9 +19,9 @@ class BaseController extends Controller
     public function sendResponse($result, $message): JsonResponse
     {
         $response = [
-            'success' => true,
-            'data'    => $result,
             'message' => __($message),
+            'data'    => $result,
+           
         ];
   
         return response()->json($response, 200);
@@ -35,7 +35,7 @@ class BaseController extends Controller
     public function sendError($error, $errorMessages = []): JsonResponse
     {
         $response = [
-            'success' => false,
+           
             'message' => __($error),
         ];
   
@@ -52,7 +52,7 @@ class BaseController extends Controller
     public function sendPaginatedResponse($paginator, $message = ''): JsonResponse
     {
         $response = [
-            'success' => true,
+            
             'data' => $paginator->items(),
             'message' => __($message),
             'pagination' => [
