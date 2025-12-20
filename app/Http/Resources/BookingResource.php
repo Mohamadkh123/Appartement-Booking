@@ -25,7 +25,7 @@ class BookingResource extends JsonResource
             'user' => new UserResource($this->whenLoaded('user')),
             'apartment' => new ApartmentResource($this->whenLoaded('apartment')),
             'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at
+           // 'updated_at' => $this->updated_at
         ];
     }
 }

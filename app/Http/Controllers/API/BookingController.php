@@ -240,6 +240,6 @@ class BookingController extends BaseController
     public function myBookings(Request $request)
     {
         $bookings = $request->user()->bookings()->with(['apartment.owner', 'apartment.images'])->paginate(10);
-        return $this->sendPaginatedResponse($bookings, 'my bookings retrieved');
+        return $this->sendPaginatedResponse($bookings, 'my bookings:');
     }
 }

@@ -27,8 +27,8 @@ class ApartmentResource extends JsonResource
             'status' => $this->status,
             'owner' => new UserResource($this->whenLoaded('owner')),
             'images' => ApartmentImageResource::collection($this->whenLoaded('images')),
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at
+           // 'created_at' => $this->created_at,
+           // 'updated_at' => $this->updated_at
         ];
     }
 }

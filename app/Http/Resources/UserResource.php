@@ -22,7 +22,7 @@ class UserResource extends JsonResource
             'id' => $this->id,
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,
-            'full_name' => $this->first_name . ' ' . $this->last_name,
+            //'full_name' => $this->first_name . ' ' . $this->last_name,
             'date_of_birth' => $this->date_of_birth,
             'email' => $this->email,
             'mobile' => $this->mobile,
@@ -31,7 +31,7 @@ class UserResource extends JsonResource
             'wallet_balance' => $this->wallet ? $this->wallet->balance : 0,
             'profile_image_url' => $this->profile_image ? asset('storage/' . $this->profile_image) : null,
             'created_at' => $this->created_at->format('Y-m-d'),
-            'updated_at' => $this->updated_at->format('Y-m-d'),
+           // 'updated_at' => $this->updated_at->format('Y-m-d'),
         ];
     }
 }
