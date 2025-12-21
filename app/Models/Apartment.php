@@ -18,7 +18,6 @@ class Apartment extends Model
         'title',
         'description',
         'price',
-        'location',
         'province',
         'city',
         'features',

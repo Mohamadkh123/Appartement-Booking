@@ -89,7 +89,6 @@ Fields:
 - title (required)
 - description (required)
 - price (required)
-- location (required)
 - province (required)
 - city (required)
 - features (optional, array)
@@ -103,11 +102,10 @@ Fields:
 - title (optional)
 - description (optional)
 - price (optional)
-- location (optional)
 - province (optional)
 - city (optional)
 - features (optional, array)
-- status (optional, available|booked)
+- status (optional, available|booked|maintenance)
 
 #### Delete Apartment (Owner or Admin only)
 ```

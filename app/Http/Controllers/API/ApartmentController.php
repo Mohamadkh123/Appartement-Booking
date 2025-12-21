@@ -66,7 +66,6 @@ class ApartmentController extends BaseController
                 'title' => $request->title,
                 'description' => $request->description,
                 'price' => $request->price,
-                'location' => $request->location,
                 'province' => $request->province,
                 'city' => $request->city,
                 'features' => $request->features ?? [],
@@ -119,17 +118,16 @@ class ApartmentController extends BaseController
             'title' => 'sometimes|string|max:255',
             'description' => 'sometimes|string',
             'price' => 'sometimes|numeric|min:0',
-            'location' => 'sometimes|string|max:255',
             'province' => 'sometimes|string|max:100',
             'city' => 'sometimes|string|max:100',
             'features' => 'nullable|array',
-            'status' => 'sometimes|in:available,booked'
-        ]);
+            'status' => 'sometimes|in:available,booked,maintenance'
+        ]));
 
         try {
             // Update apartment with provided fields
             $apartment->update($request->only([
-                'title', 'description', 'price', 'location', 'province', 'city', 'features', 'status'
+                'title', 'description', 'price', 'province', 'city', 'features', 'status'
             ]));
 
             // Load relationships

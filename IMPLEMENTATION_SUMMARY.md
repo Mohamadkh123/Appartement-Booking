@@ -9,7 +9,7 @@ This document summarizes the implementation of a comprehensive apartment booking
 
 #### Database Structure
 - **Users Table**: Extended with role, status, mobile, profile_image, and id_image fields
-- **Apartments Table**: Contains title, description, price, location, province, city, features, owner_id, and status
+- **Apartments Table**: Contains title, description, price, province, city, features, owner_id, and status
 - **Apartment Images Table**: Stores images for apartments with apartment_id foreign key
 - **Bookings Table**: Tracks bookings with user_id, apartment_id, dates, status, and total_price
 - **Reviews Table**: Stores user reviews with ratings and comments

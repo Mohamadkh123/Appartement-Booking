@@ -169,8 +169,5 @@ class User extends Authenticatable
     
       
      
-    public function withdrawalRequests()
-    {
-        return $this->hasMany(WithdrawalRequest::class, 'renter_id');
-    }
+
 }

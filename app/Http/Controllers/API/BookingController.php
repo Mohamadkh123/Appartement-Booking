@@ -47,9 +47,19 @@ class BookingController extends BaseController
      
     public function store(StoreBookingRequest $request)
     {
+        // Only tenants can book apartments
+        if (!$request->user()->isTenant()) {
+            return $this->sendError('Only tenants can book apartments', [], 403);
+        }
+
         try {
             $user = $request->user();
             $apartment = Apartment::findOrFail($request->apartment_id);
+
+            // Prevent tenants from booking their own apartments
+            if ($apartment->owner_id === $user->id) {
+                return $this->sendError('You cannot book your own apartment', [], 403);
+            }
 
             // Calculate total price based on days
             $startDate = Carbon::parse($request->start_date);

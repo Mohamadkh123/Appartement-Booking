@@ -13,7 +13,8 @@ class StoreBookingRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true; // All authenticated users can book
+        // Only tenants can book apartments
+        return $this->user() && $this->user()->isTenant();
     }
 
     /**
@@ -111,5 +112,18 @@ class StoreBookingRequest extends FormRequest
             'end_date.date' => 'End date must be a valid date',
             'end_date.after' => 'End date must be after start date'
         ];
+    }
+
+    /**
+     * Get the error message for authorization failure.
+     *
+     * @return string
+     */
+    public function forbiddenResponse()
+    {
+        return response()->json([
+            'success' => false,
+            'message' => 'Only tenants can book apartments'
+        ], 403);
     }
 }

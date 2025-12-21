@@ -29,14 +29,10 @@ Route::middleware('auth:sanctum')->group(function () {
         
         // Wallet Management Routes (Admin only)
         Route::post('/admin/wallet/deposit/{user}', [WalletController::class, 'deposit']); // Deposit money to tenant wallet
-        Route::get('/admin/wallet/withdrawal-requests', [WalletController::class, 'listWithdrawalRequests']); // List withdrawal requests
-        Route::post('/admin/wallet/withdrawal-requests/{request}/approve', [WalletController::class, 'approveWithdrawal']); // Approve withdrawal request
-        Route::post('/admin/wallet/withdrawal-requests/{request}/reject', [WalletController::class, 'rejectWithdrawal']); // Reject withdrawal request
     });
     
     // Wallet Routes (Accessible to all authenticated users)
     Route::get('/wallet/balance/{user}', [WalletController::class, 'balance']); // Get wallet balance
-    Route::post('/wallet/withdrawal-request', [WalletController::class, 'requestWithdrawal']); // Request withdrawal (renters only)
     
     // Public Apartment Routes (Accessible to all authenticated users)
     Route::get('/apartments', [ApartmentController::class, 'index']); // List all apartments

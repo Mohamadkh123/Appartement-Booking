@@ -16,7 +16,6 @@ return new class extends Migration
             $table->string('title');
             $table->text('description');
             $table->decimal('price', 10, 2);
-            $table->string('location');
             $table->string('province'); // For filtering by province
             $table->string('city'); // For filtering by city
             $table->json('features')->nullable(); // Store features as JSON
