@@ -2,35 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\API\BaseController as APIController;
 use App\Models\User;
 use App\Models\Apartment;
 use App\Models\Booking;
 use App\Models\Wallet;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Http\JsonResponse;
 use Exception;
 
 class AdminController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        $this->middleware('auth');
-        $this->middleware('admin');
-    }
-
-    /**
-     * Show the admin dashboard.
-     *
-     * @return JsonResponse
-     */
-    public function index(): JsonResponse
+    public function index()
     {
         $stats = [
             'total_users' => User::count(),
@@ -44,132 +27,93 @@ class AdminController extends Controller
             'total_revenue' => Booking::where('status', 'confirmed')->sum('total_price')
         ];
 
-        return $this->sendResponse($stats, 'admin dashboard statistics retrieved');
+        return view('admin.dashboard', compact('stats'));
     }
 
-    /**
-     * Display a listing of pending users.
-     *
-     * @return JsonResponse
-     */
-    public function pendingUsers(): JsonResponse
-    {
-        $users = User::where('status', 'pending')->paginate(20);
-        return $this->sendPaginatedResponse($users, 'pending users retrieved');
-    }
-
-    /**
-     * Display a listing of all users.
-     *
-     * @return JsonResponse
-     */
-    public function users(): JsonResponse
+    public function users()
     {
         $users = User::paginate(20);
-        return $this->sendPaginatedResponse($users, 'users retrieved');
+        return view('admin.users.index', compact('users'))->with('title', 'All Users');
     }
 
-    /**
-     * Approve a user.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\User  $user
-     * @return JsonResponse
-     */
-    public function approveUser(Request $request, User $user): JsonResponse
+    public function pendingUsers()
     {
-        // Check if user is already approved
+        $users = User::where('status', 'pending')->paginate(20);
+        return view('admin.users.index', compact('users'))->with('title', 'Pending Approvals');
+    }
+
+    public function approveUser(User $user)
+    {
         if ($user->status === 'active') {
-            return $this->sendError('User already approved.');
+            return back()->with('error', 'User already approved.');
         }
 
-        try {
-            // Update user status to "active"
-            $user->update(['status' => 'active']);
-            
-            return $this->sendResponse([
-                'message' => 'User approved successfully.',
-                'user' => $user,
-            ]);
-
-        } catch (Exception $e) {
-            return $this->sendError('User approval failed: ' . $e->getMessage());
-        }
+        $user->update(['status' => 'active']);
+        return back()->with('success', 'User approved successfully.');
     }
 
-    /**
-     * Reject a user.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\User  $user
-     * @return JsonResponse
-     */
-    public function rejectUser(Request $request, User $user): JsonResponse
+    public function rejectUser(User $user)
     {
-        // Check if action is invalid (if user is already rejected or active)
-        if ($user->status === 'rejected' || $user->status === 'active') {
-            return $this->sendError('Invalid action.');
-        }
-
         try {
-            // Delete user images from storage
-            if ($user->id_image) {
-                Storage::disk('public')->delete($user->id_image);
-            }
-            
-            if ($user->profile_image) {
-                Storage::disk('public')->delete($user->profile_image);
-            }
+            if ($user->id_image) Storage::disk('public')->delete($user->id_image);
+            if ($user->profile_image) Storage::disk('public')->delete($user->profile_image);
 
-            // Delete user
             $user->delete();
-
-            return $this->sendResponse([], 'User rejected successfully.');
-
+            return back()->with('success', 'User rejected and removed.');
         } catch (Exception $e) {
-            return $this->sendError('User rejection failed: ' . $e->getMessage());
+            return back()->with('error', 'Rejection failed.');
         }
     }
 
-    /**
-     * Deposit money to a user's wallet
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\User  $user
-     * @return JsonResponse
-     */
-    public function deposit(Request $request, User $user): JsonResponse
+    public function deposit(Request $request, User $user)
     {
-        $request->validate([
-            'amount' => 'required|numeric|min:0.01'
+        $request->validate(['amount' => 'required|numeric|min:0.01']);
+
+        try {
+            $wallet = $user->wallet ?: new Wallet(['user_id' => $user->id, 'balance' => 0]);
+            $wallet->balance += $request->amount;
+            $user->wallet()->save($wallet);
+
+            return back()->with('success', "Deposited $" . number_format($request->amount, 2) . " to {$user->name}");
+        } catch (Exception $e) {
+            return back()->with('error', 'Deposit failed.');
+        }
+    }
+
+    // Show the login form
+    public function showLoginForm()
+    {
+        if (Auth::check()) {
+            return redirect('/admin/dashboard');
+        }
+        return view('auth.login');
+    }
+
+    // Handle the login logic
+    public function login(Request $request)
+    {
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
         ]);
 
-        try {
-            // Ensure user is a tenant
-            if (!$user->isTenant()) {
-                return $this->sendError('Only tenants can have wallet deposits');
-            }
-            
-            // Create wallet if it doesn't exist
-            $wallet = $user->wallet;
-            if (!$wallet) {
-                $wallet = new Wallet(['user_id' => $user->id, 'balance' => 0]);
-                $user->wallet()->save($wallet);
-            }
+        if (Auth::attempt($credentials)) {
+            $request->session()->regenerate();
 
-            // Update balance
-            $wallet->balance = (float)(($wallet->balance ?? 0) + $request->amount);
-            $wallet->save();
-
-            return $this->sendResponse([
-                'wallet' => $wallet,
-                'message' => 'Deposit successful. New balance: $' . number_format($wallet->balance ?? 0, 2)
-            ], 'Deposit successful.');
-
-        } catch (Exception $e) {
-            return $this->sendError('Deposit failed: ' . $e->getMessage());
+            return redirect()->intended('/admin/dashboard');
         }
+
+        return back()->withErrors([
+            'email' => 'The provided credentials do not match our records.',
+        ])->onlyInput('email');
     }
 
-
+    // Handle logout
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect('/');
+    }
 }

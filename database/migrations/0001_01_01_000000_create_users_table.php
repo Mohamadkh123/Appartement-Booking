@@ -20,8 +20,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
-        
-            $table->enum('role', ['admin', 'tenant', 'renter'])->default('tenant');
+            $table->enum('role', ['admin', 'tenant', 'owner'])->default('tenant');
             $table->enum('status', ['pending', 'active','rejected'])->default('pending');
             $table->string('mobile')->unique();
             $table->string('profile_image')->nullable();
