@@ -53,13 +53,17 @@ class RegisterController extends BaseController
                 'profile_image' => $profileImagePath
             ]);
             
-            // Create token for the user
-            $success['token'] =  $user->createToken('MyApp')->plainTextToken;
+            // Create token for the user but don't include it in the response
+            $user->createToken('MyApp')->plainTextToken;
+            
+            // Only return user details, not the token
             $success['first_name'] =  $user->first_name;
             $success['last_name'] =  $user->last_name;
             $success['full_name'] =  $user->first_name . ' ' . $user->last_name;
             $success['role'] =  $user->role;
             $success['status'] =  $user->status;
+            $success['email'] =  $user->email;
+            $success['mobile'] =  $user->mobile;
             
             return $this->sendResponse($success, 'register success');
         } catch (Exception $e) {

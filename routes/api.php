@@ -21,20 +21,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/user', [RegisterController::class, 'updateProfile']); // Update authenticated user profile
     Route::post('/logout', [RegisterController::class, 'logout']); // Logout authenticated user
 
-    // Admin Routes (Require Admin Role)
-    Route::middleware('admin')->group(function () {
-        // Admin Dashboard Routes
-        Route::get('/admin/dashboard', [AdminController::class, 'index']); // Get admin dashboard statistics
-        
-        // Admin User Management Routes
-        Route::get('/admin/users', [AdminController::class, 'users']); // Get all users
-        Route::get('/admin/users/pending', [AdminController::class, 'pendingUsers']); // Get pending users
-        Route::post('/admin/users/{user}/approve', [AdminController::class, 'approveUser']); // Approve user
-        Route::post('/admin/users/{user}/reject', [AdminController::class, 'rejectUser']); // Reject user
-        
-        // Admin Wallet Management Routes
-        Route::post('/admin/wallet/deposit/{user}', [AdminController::class, 'deposit']); // Deposit to user wallet
-    });
+ 
     
     // Wallet Routes (Accessible to all authenticated users)
     Route::get('/wallet/balance/{user}', [WalletController::class, 'balance']); // Get wallet balance
@@ -60,6 +47,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/bookings/{booking}', [BookingController::class, 'show']); // Show specific booking
     Route::put('/bookings/{booking}', [BookingController::class, 'update']); // Update booking status (owner/admin)
     Route::put('/bookings/{booking}/details', [BookingController::class, 'updateDetails']); // Update booking details (user)
+    Route::put('/bookings/{booking}/approve-modification', [BookingController::class, 'approveModification']); // Approve booking modification (owner/admin)
     Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancel']); // Cancel booking (user)
     Route::get('/my-bookings', [BookingController::class, 'myBookings']); // List current user's bookings
         

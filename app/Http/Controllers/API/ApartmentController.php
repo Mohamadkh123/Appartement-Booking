@@ -7,6 +7,7 @@ use App\Http\Requests\StoreApartmentRequest;
 use App\Http\Resources\ApartmentResource;
 use App\Models\Apartment;
 use App\Models\ApartmentImage;
+use App\Notifications\ApartmentActivity;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -83,6 +84,9 @@ class ApartmentController extends BaseController
                 }
             }
 
+            // Send notification about new apartment
+            $user->notify(new ApartmentActivity('new_apartment', $apartment->id, $user->id));
+
             // Load relationships
             $apartment->load(['owner', 'images']);
 
@@ -129,6 +133,9 @@ class ApartmentController extends BaseController
             $apartment->update($request->only([
                 'title', 'description', 'price', 'province', 'city', 'features', 'status'
             ]));
+
+            // Send notification about apartment update
+            $request->user()->notify(new ApartmentActivity('update_apartment', $apartment->id, $request->user()->id));
 
             // Load relationships
             $apartment->load(['owner', 'images']);

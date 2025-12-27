@@ -18,7 +18,7 @@ class BookingStatusChanged extends Notification
     /**
      * Create a new notification instance.
      */
-    public function __construct(Booking $booking, string $status)
+    public function __construct($booking, string $status)
     {
         $this->booking = $booking;
         $this->status = $status;
@@ -33,6 +33,12 @@ class BookingStatusChanged extends Notification
                 break;
             case 'cancelled':
                 $this->message = __('messages.booking_cancelled');
+                break;
+            case 'modification_approved':
+                $this->message = 'Your booking modification has been approved';
+                break;
+            case 'modification_rejected':
+                $this->message = 'Your booking modification has been rejected';
                 break;
             default:
                 $this->message = __('messages.booking_status_updated');
@@ -56,14 +62,21 @@ class BookingStatusChanged extends Notification
      */
     public function toArray(object $notifiable): array
     {
-        return [
-            'booking_id' => $this->booking->id,
-            'apartment_title' => $this->booking->apartment->title,
-            'status' => $this->status,
-            'message' => $this->message,
-            'total_price' => '$' . number_format($this->booking->total_price, 2),
-            'start_date' => $this->booking->start_date,
-            'end_date' => $this->booking->end_date
-        ];
+        if ($this->booking) {
+            return [
+                'booking_id' => $this->booking->id,
+                'apartment_title' => $this->booking->apartment->title,
+                'status' => $this->status,
+                'message' => $this->message,
+                'total_price' => '$' . number_format($this->booking->total_price, 2),
+                'start_date' => $this->booking->start_date,
+                'end_date' => $this->booking->end_date
+            ];
+        } else {
+            return [
+                'status' => $this->status,
+                'message' => $this->message,
+            ];
+        }
     }
 }
