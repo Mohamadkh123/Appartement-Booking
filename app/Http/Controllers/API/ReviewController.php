@@ -60,61 +60,6 @@ class ReviewController extends BaseController
     }
 
     
-      
-     
-    public function show(Review $review)
-    {
-        // Load relationships
-        $review->load(['user', 'apartment']);
-        return $this->sendResponse(new ReviewResource($review), 'messages.review_retrieved');
-    }
-
-    
-     //Update the specified resource in storage.
-     
-    public function update(StoreReviewRequest $request, Review $review)
-    {
-        // Check ownership
-        if ($request->user()->id !== $review->user_id) {
-            return $this->sendError('messages.unauthorized', ['error' => 'messages.unauthorized']);
-        }
-
-        try {
-            // Update review fields
-            $review->update([
-                'rating' => $request->rating,
-                'comment' => $request->comment
-            ]);
-
-            // Load relationships
-            $review->load(['user', 'apartment']);
-
-            return $this->sendResponse(new ReviewResource($review), 'messages.review_updated');
-        } catch (\Exception $e) {
-            return $this->sendError('messages.review_update_failed', ['error' => $e->getMessage()]);
-        }
-    }
-
-    
-     //Remove the specified resource from storage.
-     
-    public function destroy(Request $request, Review $review)
-    {
-        // Check ownership or admin privileges
-        if ($request->user()->id !== $review->user_id && !$request->user()->isAdmin()) {
-            return $this->sendError('messages.unauthorized', ['error' => 'messages.unauthorized']);
-        }
-
-        try {
-            // Delete review
-            $review->delete();
-            return $this->sendResponse([], 'messages.review_deleted');
-        } catch (\Exception $e) {
-            return $this->sendError('messages.review_deletion_failed', ['error' => $e->getMessage()]);
-        }
-    }
-
-
       //Get reviews for a specific apartment
      
     public function apartmentReviews(Apartment $apartment)
@@ -122,4 +67,5 @@ class ReviewController extends BaseController
         $reviews = $apartment->reviews()->with('user')->paginate(10);
         return $this->sendPaginatedResponse($reviews, 'apartment reviews retrieved');
     }
+
 }

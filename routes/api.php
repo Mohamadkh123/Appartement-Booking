@@ -30,6 +30,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/apartments', [ApartmentController::class, 'index']); // List all apartments
     Route::get('/apartments/{apartment}', [ApartmentController::class, 'show']); // Show specific apartment
     Route::get('/apartments/{apartment}/reviews', [ReviewController::class, 'apartmentReviews']); // Get reviews for specific apartment
+    
 
     // Apartment Management Routes (Owner/Renter only)
     Route::post('/apartments', [ApartmentController::class, 'store']); // Create new apartment
@@ -53,9 +54,6 @@ Route::middleware('auth:sanctum')->group(function () {
     // Review Routes
     Route::post('/reviews', [ReviewController::class, 'store']); // Create/update review
     Route::get('/reviews', [ReviewController::class, 'index']); // List all reviews (with filters)
-    Route::get('/reviews/{review}', [ReviewController::class, 'show']); // Show specific review
-    Route::put('/reviews/{review}', [ReviewController::class, 'update']); // Update review (owner)
-    Route::delete('/reviews/{review}', [ReviewController::class, 'destroy']); // Delete review (owner/admin)
     
     // Messaging Routes
     Route::post('/messages/send', [MessageController::class, 'send']); // Send message to user
