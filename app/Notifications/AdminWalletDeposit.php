@@ -40,7 +40,7 @@ class AdminWalletDeposit extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'type' => 'admin_wallet_deposit',
+            'type' => 'admin wallet deposit',
             'message' => 'Admin deposited amount to your wallet',
             'amount' => $this->amount,
             'tenant_id' => $this->tenantId,

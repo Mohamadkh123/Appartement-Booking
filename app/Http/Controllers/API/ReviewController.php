@@ -29,7 +29,7 @@ class ReviewController extends BaseController
 
         $reviews = $query->paginate(10);
 
-        return $this->sendPaginatedResponse($reviews, 'messages.reviews_retrieved');
+        return $this->sendPaginatedResponse($reviews, 'messages reviews retrieved', 200);
     }
 
     
@@ -53,9 +53,9 @@ class ReviewController extends BaseController
             // Load relationships
             $review->load(['user', 'apartment']);
 
-            return $this->sendResponse(new ReviewResource($review), 'messages.review_saved');
+            return $this->sendResponse(new ReviewResource($review), 'Review saved successfully', 201);
         } catch (\Exception $e) {
-            return $this->sendError('messages.review_save_failed', ['error' => $e->getMessage()]);
+            return $this->sendError('Review save failed', ['error' => $e->getMessage()],500);
         }
     }
 
@@ -65,7 +65,7 @@ class ReviewController extends BaseController
     public function apartmentReviews(Apartment $apartment)
     {
         $reviews = $apartment->reviews()->with('user')->paginate(10);
-        return $this->sendPaginatedResponse($reviews, 'apartment reviews retrieved');
+        return $this->sendPaginatedResponse($reviews, 'apartment reviews retrieved', 200);
     }
 
 }

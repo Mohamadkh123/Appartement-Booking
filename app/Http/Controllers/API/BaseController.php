@@ -4,68 +4,43 @@ namespace App\Http\Controllers\API;
   
 use App\Http\Controllers\Controller as Controller;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Pagination\Paginator;
-use Illuminate\Support\Facades\App;
   
 class BaseController extends Controller
 {
-    /**
-     * success response method.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function sendResponse($result, $message): JsonResponse
+    public function sendResponse($result, string $message = '', int $status )
     {
-        $response = [
-            'message' => __($message),
+        return response()->json([
+            'message' => $message,
             'data'    => $result,
-           
-        ];  
-          
-        return new JsonResponse($response, 200);
+        ], $status);
     }
-  
-   /**
-     * return error response.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function sendError($error, $errorMessages = []): JsonResponse
+
+    public function sendError(string $message, array $errorMessages = [], int $status ): JsonResponse
     {
         $response = [
-           
-            'message' => __($error),
+            'message' => $message,
         ];
-  
-        if(!empty($errorMessages)){
+
+        if (!empty($errorMessages)) {
             $response['data'] = $errorMessages;
         }
-  
-        return new JsonResponse($response, 404);
+
+        return response()->json($response, $status);
     }
 
-      
-     //Send paginated response
-     
-    public function sendPaginatedResponse($paginator, $message = ''): JsonResponse
+    public function sendPaginatedResponse($paginator, string $message = '', int $status ): JsonResponse
     {
-        $response = [
-
-            
-            'data' => $paginator->items(),
-            'message' => __($message),
+        return response()->json([
+            'message' => $message,
+            'data'    => $paginator->items(),
             'pagination' => [
                 'current_page' => $paginator->currentPage(),
-                'last_page' => $paginator->lastPage(),
-                'per_page' => $paginator->perPage(),
-                'total' => $paginator->total(),
-                'from' => $paginator->firstItem(),
-                'to' => $paginator->lastItem(),
-            ]
-        ];
-
-        return new JsonResponse($response, 200);
+                'last_page'    => $paginator->lastPage(),
+                'per_page'     => $paginator->perPage(),
+                'total'        => $paginator->total(),
+                'from'         => $paginator->firstItem(),
+                'to'           => $paginator->lastItem(),
+            ],
+        ], $status);
     }
 }

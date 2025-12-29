@@ -29,7 +29,7 @@ class MessageController extends BaseController
                 
                 // Verify that either sender or receiver is the apartment owner
                 if ($apartment->owner_id !== $user->id && $apartment->owner_id !== $receiver->id) {
-                    return $this->sendError('You are not authorized to message about this apartment');
+                    return $this->sendError('You are not authorized to message about this apartment', [],403);
                 }
             }
 
@@ -41,7 +41,7 @@ class MessageController extends BaseController
                 // Verify that either sender or receiver is involved in the booking
                 if ($booking->user_id !== $user->id && $booking->user_id !== $receiver->id && 
                     $booking->apartment->owner_id !== $user->id && $booking->apartment->owner_id !== $receiver->id) {
-                    return $this->sendError('You are not authorized to message about this booking');
+                    return $this->sendError('You are not authorized to message about this booking', [],403);
                 }
             }
 
@@ -56,9 +56,9 @@ class MessageController extends BaseController
             // Load relationships
             $message->load(['sender', 'receiver', 'apartment', 'booking']);
 
-            return $this->sendResponse(new MessageResource($message), 'messages.message_sent');
+            return $this->sendResponse(new MessageResource($message), 'Message sent successfully',200);
         } catch (Exception $e) {
-            return $this->sendError('messages.message_send_failed', ['error' => $e->getMessage()]);
+            return $this->sendError('Failed to send message', ['error' => $e->getMessage()],500);
         }
     }
 
@@ -86,7 +86,7 @@ class MessageController extends BaseController
             ->where('is_read', false)
             ->update(['is_read' => true]);
 
-        return $this->sendPaginatedResponse($messages, 'messages.conversation_retrieved');
+        return $this->sendPaginatedResponse($messages, 'messages conversation retrieved',200);
     }
 
     
@@ -111,7 +111,7 @@ class MessageController extends BaseController
         ->take(20)
         ->values();
 
-        return $this->sendResponse(MessageResource::collection($conversations), 'messages.inbox_retrieved');
+        return $this->sendResponse(MessageResource::collection($conversations), 'Inbox retrieved successfully',200);
     }
 
     

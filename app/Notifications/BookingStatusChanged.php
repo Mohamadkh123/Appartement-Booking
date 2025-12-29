@@ -26,13 +26,13 @@ class BookingStatusChanged extends Notification
         // Set message based on status
         switch ($status) {
             case 'confirmed':
-                $this->message = __('messages.booking_confirmed');
+                $this->message= 'Booking confirmed';
                 break;
             case 'rejected':
-                $this->message = __('messages.booking_rejected');
+                $this->message ='Booking rejected';
                 break;
             case 'cancelled':
-                $this->message = __('messages.booking_cancelled');
+                $this->message ='Booking cancelled';
                 break;
             case 'modification_approved':
                 $this->message = 'Your booking modification has been approved';
@@ -41,7 +41,7 @@ class BookingStatusChanged extends Notification
                 $this->message = 'Your booking modification has been rejected';
                 break;
             default:
-                $this->message = __('messages.booking_status_updated');
+                $this->message ='Booking status updated';
         }
     }
 

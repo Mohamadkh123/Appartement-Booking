@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Exception;
+use App\Notifications\AdminWalletDeposit;
 
 class AdminController extends Controller
 {
@@ -73,6 +74,9 @@ class AdminController extends Controller
             $wallet = $user->wallet ?: new Wallet(['user_id' => $user->id, 'balance' => 0]);
             $wallet->balance += $request->amount;
             $user->wallet()->save($wallet);
+
+            // Send notification to the tenant about the deposit
+            $user->notify(new AdminWalletDeposit($request->amount, $user->id));
 
             return back()->with('success', "Deposited $" . number_format($request->amount, 2) . " to {$user->name}");
         } catch (Exception $e) {

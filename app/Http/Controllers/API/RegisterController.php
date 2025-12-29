@@ -9,7 +9,7 @@ use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Http\JsonResponse;
+
 
 
 
@@ -17,13 +17,7 @@ use Illuminate\Http\JsonResponse;
 
 class RegisterController extends BaseController
 {
-    
-    /**
-     * Register api
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function register(RegisterRequest $request): JsonResponse
+    public function register(RegisterRequest $request)
     {
         try {
             // Handle ID image upload
@@ -65,18 +59,14 @@ class RegisterController extends BaseController
             $success['email'] =  $user->email;
             $success['mobile'] =  $user->mobile;
             
-            return $this->sendResponse($success, 'register success');
+            return $this->sendResponse($success, 'register success',201);
         } catch (Exception $e) {
-            return $this->sendError('messages.registration_failed', ['error' => $e->getMessage()]);
+            return $this->sendError('Registration failed', ['error' => $e->getMessage()], 500);
         }
     }
    
-    /**
-     * Login api
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function login(Request $request): JsonResponse
+    
+    public function login(Request $request)
     {
         $request->validate([
             'mobile' => 'required|string',
@@ -88,12 +78,12 @@ class RegisterController extends BaseController
 
         // Check if user exists and password is correct
         if (!$user || !Hash::check($request->password, $user->password)) {
-            return $this->sendError('messages.invalid_credentials');
+            return $this->sendError('Mobile number or password is incorrect', [],401);
         }
 
         // Check if user account is active
         if ($user->status !== 'active') {
-            return $this->sendError('messages.account_not_active');
+            return $this->sendError('Your account is not active, please wait for admin approval', [],403);
         }
 
         // Create token for the user
@@ -103,13 +93,13 @@ class RegisterController extends BaseController
         $success['full_name'] =  $user->first_name . ' ' . $user->last_name;
         $success['role'] =  $user->role;
 
-        return $this->sendResponse($success, 'login success');
+        return $this->sendResponse($success, 'login success',200);
     }
 
     
       //Get user profile
      
-    public function profile(Request $request): JsonResponse
+    public function profile(Request $request)
     {
         $user = $request->user();
         
@@ -122,13 +112,13 @@ class RegisterController extends BaseController
             $userData['profile_image_url'] = asset('storage/' . $user->profile_image);
         }
 
-        return $this->sendResponse($userData, 'user profile retrieved');
+        return $this->sendResponse($userData, 'user profile retrieved',200);
     }
 
     
       //Update user profile
      
-    public function updateProfile(Request $request): JsonResponse
+    public function updateProfile(Request $request)
     {
         $user = $request->user();
 
@@ -185,24 +175,24 @@ class RegisterController extends BaseController
                 $userData['profile_image_url'] = asset('storage/' . $user->profile_image);
             }
 
-            return $this->sendResponse($userData, 'profile updated');
+            return $this->sendResponse($userData, 'Profile updated successfully',200);
         } catch (Exception $e) {
-            return $this->sendError('messages.profile_update_failed', ['error' => $e->getMessage()]);
+            return $this->sendError('profile update failed', ['error' => $e->getMessage()],500);
         }
     }
     
     
      //Logout api
      
-    public function logout(Request $request): JsonResponse
+    public function logout(Request $request)
     {
         try {
             // Revoke the current user's token
             $request->user()->currentAccessToken()->delete();
 
-            return $this->sendResponse([], 'logout success');
+            return $this->sendResponse([], 'logout success',200);
         } catch (Exception $e) {
-            return $this->sendError('messages.logout_failed', ['error' => $e->getMessage()]);
+            return $this->sendError('logout failed', ['error' => $e->getMessage()],500);
         }
     }
 }

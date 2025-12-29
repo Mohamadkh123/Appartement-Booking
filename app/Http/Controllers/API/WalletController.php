@@ -31,7 +31,7 @@ class WalletController extends BaseController
 
             // Ensure user is a tenant
             if (!$user->isTenant()) {
-                return $this->sendError('Only tenants can have wallet deposits');
+                return $this->sendError('Only tenants can have wallet deposits', [], 400);
             }
 
             // Create wallet if it doesn't exist
@@ -48,9 +48,9 @@ class WalletController extends BaseController
             return $this->sendResponse([
                 'user_id' => $user->id,
                 'new_balance' => $wallet->balance
-            ], 'Deposit successful');
+            ], 'Deposit successful', 200);
         } catch (Exception $e) {
-            return $this->sendError('Deposit failed', ['error' => $e->getMessage()]);
+            return $this->sendError('Deposit failed', ['error' => $e->getMessage()], 500);
         }
     }
 
@@ -76,9 +76,9 @@ class WalletController extends BaseController
             return $this->sendResponse([
                 'user_id' => $user->id,
                 'balance' => $wallet->balance
-            ], 'Balance retrieved successfully');
+            ], 'Balance retrieved successfully', 200);
         } catch (Exception $e) {
-            return $this->sendError('Failed to retrieve balance', ['error' => $e->getMessage()]);
+            return $this->sendError('Failed to retrieve balance', ['error' => $e->getMessage()], 500);
         }
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\API\BaseController as BaseController;
 use App\Http\Requests\StoreApartmentRequest;
 use App\Http\Resources\ApartmentResource;
+use App\Http\Resources\BookingResource;
 use App\Models\Apartment;
 use App\Models\ApartmentImage;
 use App\Notifications\ApartmentActivity;
@@ -52,7 +53,7 @@ class ApartmentController extends BaseController
         $apartments = $query->paginate(10);
 
         // Return paginated response
-        return $this->sendPaginatedResponse($apartments, 'apartments retrieved');
+        return $this->sendPaginatedResponse($apartments, 'apartments retrieved',200);
     }
 
     
@@ -91,11 +92,11 @@ class ApartmentController extends BaseController
             // Load relationships
             $apartment->load(['owner', 'images']);
 
-            return $this->sendResponse(new ApartmentResource($apartment), 'apartment created');
+            return $this->sendResponse(new ApartmentResource($apartment), 'apartment created',201);
 
 } catch (Exception $e) {
     // Handle creation errors
-    return $this->sendError('apartment creation failed', ['error' => $e->getMessage()]);
+    return $this->sendError('apartment creation failed', ['error' => $e->getMessage()],500);
 }
     }
 
@@ -106,7 +107,7 @@ class ApartmentController extends BaseController
     {
         // Load relationships
         $apartment->load(['owner', 'images']);
-        return $this->sendResponse(new ApartmentResource($apartment), 'apartment retrieved');
+        return $this->sendResponse(new ApartmentResource($apartment), 'apartment retrieved',200);
     }
 
     
@@ -116,7 +117,7 @@ class ApartmentController extends BaseController
     {
         // Check ownership
         if ($request->user()->id !== $apartment->owner_id) {
-            return $this->sendError('unauthorized');
+            return $this->sendError('unauthorized',[],401);
         }
 
         $request->validate([
@@ -141,10 +142,10 @@ class ApartmentController extends BaseController
             // Load relationships
             $apartment->load(['owner', 'images']);
 
-            return $this->sendResponse(new ApartmentResource($apartment), 'apartment updated');
+            return $this->sendResponse(new ApartmentResource($apartment), 'apartment updated',200);
         } catch (Exception $e) {
             // Handle update errors
-            return $this->sendError('apartment update failed', ['error' => $e->getMessage()]);
+            return $this->sendError('apartment update failed', ['error' => $e->getMessage()],500);
         }
     }
 
@@ -156,7 +157,7 @@ class ApartmentController extends BaseController
         // Check ownership or admin privileges
         if ($request->user()->id !== $apartment->owner_id && !$request->user()->isAdmin()) {
             // Return unauthorized error
-            return $this->sendError('unauthorized');
+            return $this->sendError('unauthorized',[],401);
         }
 
         try {
@@ -168,10 +169,10 @@ class ApartmentController extends BaseController
             // Delete apartment
             $apartment->delete();
 
-            return $this->sendResponse([], 'apartment deleted');
+            return $this->sendResponse([], 'apartment deleted',204);
                  } catch (Exception $e) {
                    // Handle deletion errors
-                   return $this->sendError('apartment deletion failed', ['error' => $e->getMessage()]);
+                   return $this->sendError('apartment deletion failed', ['error' => $e->getMessage()],500);
                  }
                 }
 
@@ -184,18 +185,18 @@ class ApartmentController extends BaseController
         
         // Check if user is tenant
         if (!$user->isTenant()) {
-            return $this->sendError('Only tenants can add apartments to favorites');
+            return $this->sendError('Only tenants can add apartments to favorites', [], 403);
         }
         
         // Check if already favorited
         $favorite = $user->favorites()->where('apartment_id', $apartment->id)->first();
         
         if ($favorite) {
-            return $this->sendError('Apartment already added to favorites');
+            return $this->sendError('Apartment already added to favorites', [], 400);
         } else {
             // Add to favorites
             $user->favorites()->create(['apartment_id' => $apartment->id]);
-            return $this->sendResponse([], 'Apartment added to favorites');
+            return $this->sendResponse([], 'Apartment added to favorites',200);
         }
     }
     
@@ -207,18 +208,18 @@ class ApartmentController extends BaseController
         
         // Check if user is tenant
         if (!$user->isTenant()) {
-            return $this->sendError('Only tenants can remove apartments from favorites');
+            return $this->sendError('Only tenants can remove apartments from favorites', [], 403);
         }
         
         // Check if already favorited
         $favorite = $user->favorites()->where('apartment_id', $apartment->id)->first();
         
         if (!$favorite) {
-            return $this->sendError('Apartment already removed from favorites');
+            return $this->sendError('Apartment already removed from favorites', [], 400);
         } else {
             // Remove from favorites
             $favorite->delete();
-            return $this->sendResponse([], 'Apartment removed from favorites');
+            return $this->sendResponse([], 'Apartment removed from favorites',204);
         }
     }
 
@@ -232,7 +233,7 @@ class ApartmentController extends BaseController
             return $favorite->apartment;
         });
 
-        return $this->sendPaginatedResponse($apartments, 'favorites retrieved');
+        return $this->sendPaginatedResponse($apartments, 'favorites retrieved',200);
     }
     
     /**
@@ -244,14 +245,14 @@ class ApartmentController extends BaseController
         
         // Check if user is tenant
         if (!$user->isTenant()) {
-            return $this->sendError('Only tenants can book apartments from favorites');
+            return $this->sendError('Only tenants can book apartments from favorites', [], 403);
         }
         
         // Check if apartment is in user's favorites
         $favorite = $user->favorites()->where('apartment_id', $apartment->id)->first();
         
         if (!$favorite) {
-            return $this->sendError('This apartment is not in your favorites list');
+            return $this->sendError('This apartment is not in your favorites list', [], 404);
         }
         
         // Validate booking request data
@@ -280,7 +281,7 @@ class ApartmentController extends BaseController
             ->first();
         
         if ($existingBooking) {
-            return $this->sendError('This apartment is already booked for the selected dates');
+            return $this->sendError('This apartment is already booked for the selected dates', [], 400);
         }
         
         try {
@@ -293,13 +294,13 @@ class ApartmentController extends BaseController
             // Check if tenant has a wallet
             $tenantWallet = $user->wallet;
             if (!$tenantWallet) {
-                return $this->sendError('You do not have money in your wallet.', []);
+                return $this->sendError('You do not have money in your wallet.', [], 400);
             }
 
             // Check if tenant has sufficient balance
             $currentBalance = (float)($tenantWallet->balance ?? 0);
             if ($currentBalance < $totalPrice) {
-                return $this->sendError("Insufficient balance in your wallet. Your balance: $" . number_format($currentBalance, 2) . ", Required: $" . number_format($totalPrice, 2), []);
+                return $this->sendError("Insufficient balance in your wallet. Your balance: $" . number_format($currentBalance, 2) . ", Required: $" . number_format($totalPrice, 2), [], 400);
             }
 
             // Create booking with pending status
@@ -317,10 +318,10 @@ class ApartmentController extends BaseController
             // Load relationships
             $booking->load(['user', 'apartment']);
 
-            return $this->sendResponse(new \App\Http\Resources\BookingResource($booking), 'booking created from favorites. Pending owner approval.');
+            return $this->sendResponse(new BookingResource($booking), 'booking created from favorites. Pending owner approval.',200);
         } catch (Exception $e) {
             // Handle creation errors
-            return $this->sendError('booking creation from favorites failed', ['error' => $e->getMessage()]);
+            return $this->sendError('booking creation from favorites failed', ['error' => $e->getMessage()],500);
         }
     }
 }

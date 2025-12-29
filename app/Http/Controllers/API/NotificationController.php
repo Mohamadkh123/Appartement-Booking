@@ -17,7 +17,7 @@ class NotificationController extends BaseController
         
         $notifications = $user->notifications()->orderBy('created_at', 'desc')->paginate(20);
         
-        return $this->sendPaginatedResponse($notifications, 'notifications retrieved');
+        return $this->sendPaginatedResponse($notifications, 'notifications retrieved',200);
     }
 
     /**
@@ -29,12 +29,12 @@ class NotificationController extends BaseController
         
         // Check if notification belongs to user
         if ($notification->user_id !== $user->id) {
-            return $this->sendError('unauthorized');
+            return $this->sendError('unauthorized', [],403);
         }
         
         $notification->markAsRead();
         
-        return $this->sendResponse(new NotificationResource($notification), 'notification marked as read');
+        return $this->sendResponse(new NotificationResource($notification), 'notification marked as read',200);
     }
 
     
