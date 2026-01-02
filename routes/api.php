@@ -1,14 +1,14 @@
 <?php
-use Illuminate\Http\Request;
+
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\RegisterController;
-use App\Http\Controllers\ApartmentController;
-use App\Http\Controllers\BookingController;
-use App\Http\Controllers\ReviewController;
-use App\Http\Controllers\MessageController;
-use App\Http\Controllers\WalletController;
-use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\FcmTokenController;
+use App\Http\Controllers\API\RegisterController;
+use App\Http\Controllers\API\ApartmentController;
+use App\Http\Controllers\API\BookingController;
+use App\Http\Controllers\API\ReviewController;
+use App\Http\Controllers\API\MessageController;
+use App\Http\Controllers\API\WalletController;
+use App\Http\Controllers\API\NotificationController;
+use App\Http\Controllers\API\FcmTokenController;
 
 
 // Authentication Routes

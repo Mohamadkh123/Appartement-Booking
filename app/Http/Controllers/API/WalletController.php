@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\API;
 
-use App\Http\Controllers\BaseController;
+
 use App\Models\User;
 use App\Models\Wallet;
 use App\Models\WithdrawalRequest;

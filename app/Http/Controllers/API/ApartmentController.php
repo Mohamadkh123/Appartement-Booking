@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\API;
 
-use App\Http\Controllers\BaseController;
+use App\Http\Controllers\API\BaseController;
 use App\Http\Requests\StoreApartmentRequest;
 use App\Http\Resources\ApartmentResource;
 use App\Http\Resources\BookingResource;
