@@ -1,6 +1,6 @@
 <?php
    
-namespace App\Http\Controllers\API;
+namespace App\Http\Controllers;
    
 use Illuminate\Http\Request;
 use App\Models\User;
@@ -59,7 +59,7 @@ class RegisterController extends BaseController
             $success['email'] =  $user->email;
             $success['mobile'] =  $user->mobile;
             
-            return $this->sendResponse($success, 'register success',201);
+            return $this->sendResponse($success, 'Register success',201);
         } catch (Exception $e) {
             return $this->sendError('Registration failed', ['error' => $e->getMessage()], 500);
         }
@@ -93,7 +93,7 @@ class RegisterController extends BaseController
         $success['full_name'] =  $user->first_name . ' ' . $user->last_name;
         $success['role'] =  $user->role;
 
-        return $this->sendResponse($success, 'login success',200);
+        return $this->sendResponse($success, 'Login success',200);
     }
 
     
@@ -112,7 +112,7 @@ class RegisterController extends BaseController
             $userData['profile_image_url'] = asset('storage/' . $user->profile_image);
         }
 
-        return $this->sendResponse($userData, 'user profile retrieved',200);
+        return $this->sendResponse($userData, 'User profile retrieved',200);
     }
 
     
@@ -177,7 +177,7 @@ class RegisterController extends BaseController
 
             return $this->sendResponse($userData, 'Profile updated successfully',200);
         } catch (Exception $e) {
-            return $this->sendError('profile update failed', ['error' => $e->getMessage()],500);
+            return $this->sendError('Profile update failed', ['error' => $e->getMessage()],500);
         }
     }
     
@@ -190,9 +190,9 @@ class RegisterController extends BaseController
             // Revoke the current user's token
             $request->user()->currentAccessToken()->delete();
 
-            return $this->sendResponse([], 'logout success',200);
+            return $this->sendResponse([], 'Logout success',200);
         } catch (Exception $e) {
-            return $this->sendError('logout failed', ['error' => $e->getMessage()],500);
+            return $this->sendError('Logout failed', ['error' => $e->getMessage()],500);
         }
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\API;
+namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreBookingRequest;
 use App\Http\Requests\UpdateBookingRequest;
@@ -41,7 +41,7 @@ class BookingController extends BaseController
 
         $bookings = $query->paginate(10);
 
-        return $this->sendPaginatedResponse($bookings, 'bookings retrieved', 200);
+        return $this->sendPaginatedResponse($bookings, 'Bookings retrieved', 200);
       }
 
     
@@ -91,10 +91,10 @@ class BookingController extends BaseController
             // Load relationships
             $booking->load(['user', 'apartment']);
 
-            return $this->sendResponse(new BookingResource($booking), 'booking created. Pending owner approval.',200);
+            return $this->sendResponse(new BookingResource($booking), 'Booking created. Pending owner approval.',200);
         } catch (Exception $e) {
             // Handle creation errors
-            return $this->sendError('booking creation failed', ['error' => $e->getMessage()],500);
+            return $this->sendError('Booking creation failed', ['error' => $e->getMessage()],500);
         }
     }
 
@@ -105,7 +105,7 @@ class BookingController extends BaseController
     {
         // Load relationships
         $booking->load(['user', 'apartment']);
-        return $this->sendResponse(new BookingResource($booking), 'booking retrieved',200);
+        return $this->sendResponse(new BookingResource($booking), 'Booking retrieved',200);
           }
 
     
@@ -117,7 +117,7 @@ class BookingController extends BaseController
 
         // Check admin or owner permissions
         if (!$user->isAdmin() && $user->id !== $booking->apartment->owner_id) {
-            return $this->sendError('unauthorized',[], 403);
+            return $this->sendError('Unauthorized',[], 403);
         }
         
         // Check if booking has already been cancelled by tenant - if so, owner cannot change status
@@ -206,9 +206,9 @@ class BookingController extends BaseController
             // Load relationships
             $booking->load(['user', 'apartment']);
 
-            return $this->sendResponse(new BookingResource($booking), 'booking status updated',200);
+            return $this->sendResponse(new BookingResource($booking), 'Booking status updated',200);
         } catch (Exception $e) {
-            return $this->sendError('booking update failed', ['error' => $e->getMessage()],500);
+            return $this->sendError('Booking update failed', ['error' => $e->getMessage()],500);
         }
     }
 
@@ -219,12 +219,12 @@ class BookingController extends BaseController
     {
         // Check if user owns the booking
         if ($request->user()->id !== $booking->user_id) {
-            return $this->sendError('unauthorized', [],401);
+            return $this->sendError('Unauthorized', [],401);
         }
 
         // Check if booking is in pending or confirmed status (allow cancellation of both)
         if ($booking->status !== 'pending' && $booking->status !== 'confirmed') {
-            return $this->sendError('invalid action', [],400);
+            return $this->sendError('Invalid action', [],400);
         }
 
         try {
@@ -262,9 +262,9 @@ class BookingController extends BaseController
             // Load relationships
             $booking->load(['user', 'apartment']);
             
-            return $this->sendResponse(new BookingResource($booking), 'booking cancelled',200);
+            return $this->sendResponse(new BookingResource($booking), 'Booking cancelled',200);
         } catch (Exception $e) {
-            return $this->sendError('booking cancellation failed', ['error' => $e->getMessage()],500);
+            return $this->sendError('Booking cancellation failed', ['error' => $e->getMessage()],500);
         }
     }
 
@@ -285,12 +285,12 @@ class BookingController extends BaseController
         try {
             // Check if user owns the booking
             if ($request->user()->id !== $booking->user_id) {
-                return $this->sendError('unauthorized', [],401);
+                return $this->sendError('Unauthorized', [],401);
             }
 
             // Check if booking is in pending or confirmed status
             if ($booking->status !== 'pending' && $booking->status !== 'confirmed') {
-                return $this->sendError('invalid action, booking cannot be modified', [],400);
+                return $this->sendError('Invalid action, booking cannot be modified', [],400);
             }
 
             // Calculate total price based on days if dates are provided
@@ -322,10 +322,10 @@ class BookingController extends BaseController
             // Load relationships
             $booking->load(['user', 'apartment']);
 
-            $message = ($newStatus === 'pending_modification') ? 'booking modification requested, pending owner approval.' : 'booking updated';
+            $message = ($newStatus === 'pending_modification') ? 'Booking modification requested, pending owner approval.' : 'Booking updated';
             return $this->sendResponse(new BookingResource($booking), $message,200);
         } catch (Exception $e) {
-            return $this->sendError('booking update failed', ['error' => $e->getMessage()],500);
+            return $this->sendError('Booking update failed', ['error' => $e->getMessage()],500);
         }
     }
 
@@ -335,6 +335,6 @@ class BookingController extends BaseController
     public function myBookings(Request $request)
     {
         $bookings = $request->user()->bookings()->with(['apartment.owner', 'apartment.images'])->paginate(10);
-        return $this->sendPaginatedResponse($bookings, 'my bookings:',200);
+        return $this->sendPaginatedResponse($bookings, 'My bookings:',200);
     }
 }

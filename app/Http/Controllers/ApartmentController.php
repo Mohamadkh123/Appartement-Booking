@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\Controllers\API;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\API\BaseController as BaseController;
+use App\Http\Controllers\BaseController;
 use App\Http\Requests\StoreApartmentRequest;
 use App\Http\Resources\ApartmentResource;
 use App\Http\Resources\BookingResource;
@@ -53,7 +53,7 @@ class ApartmentController extends BaseController
         $apartments = $query->paginate(10);
 
         // Return paginated response
-        return $this->sendPaginatedResponse($apartments, 'apartments retrieved',200);
+        return $this->sendPaginatedResponse($apartments, 'Apartments retrieved',200);
     }
 
     
@@ -92,22 +92,20 @@ class ApartmentController extends BaseController
             // Load relationships
             $apartment->load(['owner', 'images']);
 
-            return $this->sendResponse(new ApartmentResource($apartment), 'apartment created',201);
+            return $this->sendResponse(new ApartmentResource($apartment), 'Apartment created',201);
 
 } catch (Exception $e) {
     // Handle creation errors
-    return $this->sendError('apartment creation failed', ['error' => $e->getMessage()],500);
+    return $this->sendError('Apartment creation failed', ['error' => $e->getMessage()],500);
 }
     }
 
     
-     
-     
     public function show(Apartment $apartment)
     {
         // Load relationships
         $apartment->load(['owner', 'images']);
-        return $this->sendResponse(new ApartmentResource($apartment), 'apartment retrieved',200);
+        return $this->sendResponse(new ApartmentResource($apartment), 'Apartment retrieved',200);
     }
 
     
@@ -117,7 +115,7 @@ class ApartmentController extends BaseController
     {
         // Check ownership
         if ($request->user()->id !== $apartment->owner_id) {
-            return $this->sendError('unauthorized',[],401);
+            return $this->sendError('Unauthorized',[],401);
         }
 
         $request->validate([
@@ -142,10 +140,10 @@ class ApartmentController extends BaseController
             // Load relationships
             $apartment->load(['owner', 'images']);
 
-            return $this->sendResponse(new ApartmentResource($apartment), 'apartment updated',200);
+            return $this->sendResponse(new ApartmentResource($apartment), 'Apartment updated',200);
         } catch (Exception $e) {
             // Handle update errors
-            return $this->sendError('apartment update failed', ['error' => $e->getMessage()],500);
+            return $this->sendError('Apartment update failed', ['error' => $e->getMessage()],500);
         }
     }
 
@@ -157,7 +155,7 @@ class ApartmentController extends BaseController
         // Check ownership or admin privileges
         if ($request->user()->id !== $apartment->owner_id && !$request->user()->isAdmin()) {
             // Return unauthorized error
-            return $this->sendError('unauthorized',[],401);
+            return $this->sendError('Unauthorized',[],401);
         }
 
         try {
@@ -169,10 +167,10 @@ class ApartmentController extends BaseController
             // Delete apartment
             $apartment->delete();
 
-            return $this->sendResponse([], 'apartment deleted',204);
+            return $this->sendResponse([], 'Apartment deleted',204);
                  } catch (Exception $e) {
                    // Handle deletion errors
-                   return $this->sendError('apartment deletion failed', ['error' => $e->getMessage()],500);
+                   return $this->sendError('Apartment deletion failed', ['error' => $e->getMessage()],500);
                  }
                 }
 
@@ -233,7 +231,7 @@ class ApartmentController extends BaseController
             return $favorite->apartment;
         });
 
-        return $this->sendPaginatedResponse($apartments, 'favorites retrieved',200);
+        return $this->sendPaginatedResponse($apartments, 'Favorites retrieved',200);
     }
     
     /**
@@ -318,10 +316,10 @@ class ApartmentController extends BaseController
             // Load relationships
             $booking->load(['user', 'apartment']);
 
-            return $this->sendResponse(new BookingResource($booking), 'booking created from favorites. Pending owner approval.',200);
+            return $this->sendResponse(new BookingResource($booking), 'Booking created from favorites. Pending owner approval.',200);
         } catch (Exception $e) {
             // Handle creation errors
-            return $this->sendError('booking creation from favorites failed', ['error' => $e->getMessage()],500);
+            return $this->sendError('Booking creation from favorites failed', ['error' => $e->getMessage()],500);
         }
     }
 }

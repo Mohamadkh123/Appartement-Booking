@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\API;
+namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreReviewRequest;
 use App\Http\Resources\ReviewResource;
@@ -29,7 +29,7 @@ class ReviewController extends BaseController
 
         $reviews = $query->paginate(10);
 
-        return $this->sendPaginatedResponse($reviews, 'messages reviews retrieved', 200);
+        return $this->sendPaginatedResponse($reviews, 'Reviews retrieved', 200);
     }
 
     
@@ -65,7 +65,7 @@ class ReviewController extends BaseController
     public function apartmentReviews(Apartment $apartment)
     {
         $reviews = $apartment->reviews()->with('user')->paginate(10);
-        return $this->sendPaginatedResponse($reviews, 'apartment reviews retrieved', 200);
+        return $this->sendPaginatedResponse($reviews, 'Apartment reviews retrieved', 200);
     }
 
 }

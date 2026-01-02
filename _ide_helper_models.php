@@ -129,14 +129,30 @@ namespace App\Models{
 namespace App\Models{
 /**
  * @property int $id
+ * @property int $user_id
+ * @property string $fcm_token
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FcmToken newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FcmToken newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FcmToken query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FcmToken whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FcmToken whereFcmToken($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FcmToken whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FcmToken whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FcmToken whereUserId($value)
+ */
+	class FcmToken extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * @property int $id
  * @property string $message
- * @property int $is_read
  * @property int $sender_id
  * @property int $receiver_id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property int|null $apartment_id
- * @property int|null $booking_id
  * @property-read \App\Models\Apartment|null $apartment
  * @property-read \App\Models\Booking|null $booking
  * @property-read \App\Models\User $receiver
@@ -144,11 +160,8 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Message newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Message newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Message query()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Message whereApartmentId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Message whereBookingId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Message whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Message whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Message whereIsRead($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Message whereMessage($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Message whereReceiverId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Message whereSenderId($value)

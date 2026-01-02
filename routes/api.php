@@ -1,14 +1,15 @@
 <?php
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\API\RegisterController;
-use App\Http\Controllers\API\ApartmentController;
-use App\Http\Controllers\API\BookingController;
-use App\Http\Controllers\API\ReviewController;
-use App\Http\Controllers\API\MessageController;
-use App\Http\Controllers\API\WalletController;
-use App\Http\Controllers\API\NotificationController;
-use App\Http\Controllers\API\AdminController;
+use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\ApartmentController;
+use App\Http\Controllers\BookingController;
+use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\MessageController;
+use App\Http\Controllers\WalletController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\FcmTokenController;
+
 
 // Authentication Routes
 Route::post('/register', [RegisterController::class, 'register']); // Register new user
@@ -21,7 +22,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/user', [RegisterController::class, 'updateProfile']); // Update authenticated user profile
     Route::post('/logout', [RegisterController::class, 'logout']); // Logout authenticated user
 
- 
+    // FCM Token Routes
+    Route::post('/store-fcm-token', [FcmTokenController::class, 'store']);// Store FCM token
+    Route::get('/get-fcm-token/{userId}', [FcmTokenController::class, 'getToken']);// Get FCM token by user ID
     
     // Wallet Routes (Accessible to all authenticated users)
     Route::get('/wallet/balance/{user}', [WalletController::class, 'balance']); // Get wallet balance

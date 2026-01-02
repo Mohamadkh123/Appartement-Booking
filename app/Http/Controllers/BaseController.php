@@ -1,13 +1,14 @@
 <?php
   
-namespace App\Http\Controllers\API;
-  
-use App\Http\Controllers\Controller as Controller;
-use Illuminate\Http\JsonResponse;
+namespace App\Http\Controllers;
+
+
+use App\Http\Controllers\Controller ;
+
   
 class BaseController extends Controller
 {
-    public function sendResponse($result, string $message = '', int $status )
+    public function sendResponse($result, string $message = '', int $status)
     {
         return response()->json([
             'message' => $message,
@@ -15,7 +16,7 @@ class BaseController extends Controller
         ], $status);
     }
 
-    public function sendError(string $message, array $errorMessages = [], int $status ): JsonResponse
+    public function sendError(string $message, array $errorMessages = [], int $status)
     {
         $response = [
             'message' => $message,
@@ -28,7 +29,7 @@ class BaseController extends Controller
         return response()->json($response, $status);
     }
 
-    public function sendPaginatedResponse($paginator, string $message = '', int $status ): JsonResponse
+    public function sendPaginatedResponse($paginator, string $message = '', int $status )
     {
         return response()->json([
             'message' => $message,
