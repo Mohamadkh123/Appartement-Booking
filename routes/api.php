@@ -58,10 +58,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/reviews', [ReviewController::class, 'store']); // Create/update review
     Route::get('/reviews', [ReviewController::class, 'index']); // List all reviews (with filters)
     
-    // Messaging Routes
-    Route::post('/messages/send', [MessageController::class, 'send']); // Send message to user
-    Route::get('/messages/inbox', [MessageController::class, 'inbox']); // Get user's message inbox
-    Route::get('/messages/conversation/{user}', [MessageController::class, 'conversation']); // Get conversation with specific user
     
     // Notification Routes
     Route::get('/notifications', [NotificationController::class, 'index']); // Get user's notifications
