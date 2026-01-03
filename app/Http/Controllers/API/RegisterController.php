@@ -45,10 +45,11 @@ class RegisterController extends BaseController
                 'profile_image' => $profileImagePath
             ]);
             
-            // Create token for the user but don't include it in the response
-            $user->createToken('MyApp')->plainTextToken;
+            // Create token for the user and include it in the response
+            $token=$user->createToken('MyApp')->plainTextToken;
             
-            // Only return user details, not the token
+            // Return user details with the token
+            $success['token'] =  $token;
             $success['first_name'] =  $user->first_name;
             $success['last_name'] =  $user->last_name;
             $success['full_name'] =  $user->first_name . ' ' . $user->last_name;
