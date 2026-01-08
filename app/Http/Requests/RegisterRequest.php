@@ -28,7 +28,7 @@ class RegisterRequest extends FormRequest
             'email' => 'required|email|unique:users,email|max:255',
             'password' => 'required|string|min:8',
             'mobile' => 'required|string|unique:users,mobile|max:20',
-            'role' => 'required|in:tenant,renter',
+            'role' => 'required|in:tenant,owner',
             'id_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
             'profile_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048'
         ];

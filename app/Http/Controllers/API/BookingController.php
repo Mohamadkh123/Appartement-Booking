@@ -126,7 +126,7 @@ class BookingController extends BaseController
         }
 
         $request->validate([
-            'status' => 'required|in:confirmed,rejected,modification_approved,modification_rejected'
+            'status' => 'required|in:confirmed,rejected'
         ]);
 
         try {
@@ -178,24 +178,7 @@ class BookingController extends BaseController
                     DB::rollBack();
                     return $this->sendError('Payment processing failed', ['error' => $e->getMessage()],500);
                 }
-            } 
-            // Handle modification approval
-            elseif ($request->status === 'modification_approved' && $booking->status === 'pending_modification') {
-                // Update status to confirmed since modification is approved
-                $booking->update(['status' => 'confirmed']);
-                
-                // Send notification to the booking user
-                $booking->user->notify(new BookingStatusChanged($booking, 'modification_approved'));
-            }
-            // Handle modification rejection
-            elseif ($request->status === 'modification_rejected' && $booking->status === 'pending_modification') {
-                // Revert to original booking details, keep status as confirmed
-                $booking->update(['status' => 'confirmed']);
-                
-                // Send notification to the booking user
-                $booking->user->notify(new BookingStatusChanged($booking, 'modification_rejected'));
-            }
-            else {
+            } else {
                 // For other status updates (rejected), just update status
                 $booking->update(['status' => $request->status]);
                 
@@ -237,21 +220,24 @@ class BookingController extends BaseController
             // Update the booking status to cancelled
             $booking->update(['status' => 'cancelled']);
             
-            // If the booking was already confirmed, refund the money to tenant's wallet
+            // If the booking was already confirmed, refund half the money to tenant's wallet
             if ($bookingStatus === 'confirmed') {
+                // Calculate half the booking amount
+                $refundAmount = (float)($bookingTotalPrice / 2);
+                
                 // Get tenant wallet
                 $tenantWallet = $tenant->wallet;
                 if ($tenantWallet) {
-                    // Add the booking amount back to tenant's wallet
-                    $tenantWallet->balance = (float)($tenantWallet->balance + $bookingTotalPrice);
+                    // Add half the booking amount back to tenant's wallet
+                    $tenantWallet->balance = (float)($tenantWallet->balance + $refundAmount);
                     $tenantWallet->save();
                 }
                 
                 // Get renter wallet and deduct the amount
                 $renterWallet = $apartment->owner->wallet;
                 if ($renterWallet) {
-                    // Deduct the booking amount from renter's wallet
-                    $renterWallet->balance = (float)($renterWallet->balance - $bookingTotalPrice);
+                    // Deduct half the booking amount from renter's wallet
+                    $renterWallet->balance = (float)($renterWallet->balance - $refundAmount);
                     $renterWallet->save();
                 }
             }
@@ -288,9 +274,9 @@ class BookingController extends BaseController
                 return $this->sendError('Unauthorized', [],401);
             }
 
-            // Check if booking is in pending or confirmed status
-            if ($booking->status !== 'pending' && $booking->status !== 'confirmed') {
-                return $this->sendError('Invalid action, booking cannot be modified', [],400);
+            // Check if booking is in pending status only (prevent modification of confirmed bookings)
+            if ($booking->status !== 'pending') {
+                return $this->sendError('Cannot modify a confirmed booking. You can only cancel it.', [],400);
             }
 
             // Calculate total price based on days if dates are provided
@@ -302,28 +288,16 @@ class BookingController extends BaseController
                 $totalPrice = (float)($days * $booking->apartment->price);
             }
 
-            // If the booking was confirmed, change status to 'pending_modification' until owner approves
-            if ($booking->status === 'confirmed') {
-                $newStatus = 'pending_modification';
-                
-                // Update booking with provided fields
-                $booking->update(array_merge(
-                    $request->only(['start_date', 'end_date']),
-                    ['total_price' => $totalPrice, 'status' => $newStatus]
-                ));
-            } else {
-                // For pending bookings, just update the details
-                $booking->update(array_merge(
-                    $request->only(['start_date', 'end_date']),
-                    ['total_price' => $totalPrice, 'status' => $booking->status]
-                ));
-            }
+            // For pending bookings, just update the details
+            $booking->update(array_merge(
+                $request->only(['start_date', 'end_date']),
+                ['total_price' => $totalPrice, 'status' => $booking->status]
+            ));
 
             // Load relationships
             $booking->load(['user', 'apartment']);
 
-            $message = ($newStatus === 'pending_modification') ? 'Booking modification requested, pending owner approval.' : 'Booking updated';
-            return $this->sendResponse(new BookingResource($booking), $message,200);
+            return $this->sendResponse(new BookingResource($booking), 'Booking updated',200);
         } catch (Exception $e) {
             return $this->sendError('Booking update failed', ['error' => $e->getMessage()],500);
         }

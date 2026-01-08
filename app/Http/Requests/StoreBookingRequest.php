@@ -13,8 +13,8 @@ class StoreBookingRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        // Only tenants can book apartments
-        return $this->user() && $this->user()->isTenant();
+        
+        return true;
     }
 
     /**
