@@ -226,13 +226,18 @@ class ApartmentController extends BaseController
      
     public function favorites(Request $request)
     {
-        $favorites = $request->user()->favorites()->with('apartment.owner', 'apartment.images')->paginate(10);
-        $apartments = $favorites->map(function ($favorite) {
+        $favorites = $request->user()
+            ->favorites()
+            ->with('apartment.owner', 'apartment.images')
+            ->paginate(10);
+
+        $favorites->getCollection()->transform(function ($favorite) {
             return $favorite->apartment;
         });
 
-        return $this->sendPaginatedResponse($apartments, 'Favorites retrieved',200);
+        return $this->sendPaginatedResponse($favorites, 'favorites retrieved',200);
     }
+
     
     /**
      * Book an apartment from the favorites list

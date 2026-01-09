@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Apartment;
 use Illuminate\Foundation\Http\FormRequest;
 use App\Models\Booking;
 use Carbon\Carbon;
@@ -89,7 +90,7 @@ class StoreBookingRequest extends FormRequest
             return false;
         }
 
-        $apartment = \App\Models\Apartment::find($this->apartment_id);
+        $apartment = Apartment::find($this->apartment_id);
         
         // Apartment must exist and be available
         return $apartment && $apartment->status === 'available';

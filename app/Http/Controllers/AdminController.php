@@ -10,12 +10,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Exception;
-use App\Notifications\AdminWalletDeposit;
 
 class AdminController extends Controller
 {
-    public function index()
-    {
+    public function index() {
         $stats = [
             'total_users' => User::count(),
             'pending_users' => User::where('status', 'pending')->count(),
@@ -27,94 +25,62 @@ class AdminController extends Controller
             'confirmed_bookings' => Booking::where('status', 'confirmed')->count(),
             'total_revenue' => Booking::where('status', 'confirmed')->sum('total_price')
         ];
-
         return view('admin.dashboard', compact('stats'));
     }
 
-    public function users()
-    {
+    public function users() {
         $users = User::paginate(20);
-        return view('admin.users.index', compact('users'))->with('title', 'All Users');
+        return view('admin.users.index', compact('users'))->with('title', 'all_users');
     }
 
-    public function pendingUsers()
-    {
+    public function pendingUsers() {
         $users = User::where('status', 'pending')->paginate(20);
-        return view('admin.users.index', compact('users'))->with('title', 'Pending Approvals');
+        return view('admin.users.index', compact('users'))->with('title', 'pending_approvals');
     }
 
-    public function approveUser(User $user)
-    {
-        if ($user->status === 'active') {
-            return back()->with('error', 'User already approved.');
-        }
-
+    public function approveUser(User $user) {
         $user->update(['status' => 'active']);
-        return back()->with('success', 'User approved successfully.');
+        return back()->with('success', __('User approved successfully.'));
     }
 
-    public function rejectUser(User $user)
-    {
+    public function rejectUser(User $user) {
         try {
             if ($user->id_image) Storage::disk('public')->delete($user->id_image);
-            if ($user->profile_image) Storage::disk('public')->delete($user->profile_image);
-
             $user->delete();
-            return back()->with('success', 'User rejected and removed.');
+            return back()->with('success', __('User rejected.'));
         } catch (Exception $e) {
-            return back()->with('error', 'Rejection failed.');
+            return back()->with('error', 'Action failed.');
         }
     }
 
-    public function deposit(Request $request, User $user)
-    {
+    public function deposit(Request $request, User $user) {
         $request->validate(['amount' => 'required|numeric|min:0.01']);
-
-        try {
-            $wallet = $user->wallet ?: new Wallet(['user_id' => $user->id, 'balance' => 0]);
-            $wallet->balance += $request->amount;
-            $user->wallet()->save($wallet);
-
-            // Send notification to the tenant about the deposit
-            $user->notify(new AdminWalletDeposit($request->amount, $user->id));
-
-            return back()->with('success', "Deposited $" . number_format($request->amount, 2) . " to {$user->name}");
-        } catch (Exception $e) {
-            return back()->with('error', 'Deposit failed.');
-        }
+        $wallet = $user->wallet ?: new Wallet(['user_id' => $user->id, 'balance' => 0]);
+        $wallet->balance += $request->amount;
+        $user->wallet()->save($wallet);
+        return back()->with('success', 'Deposit successful.');
     }
 
-    // Show the login form
-    public function showLoginForm()
-    {
-        if (Auth::check()) {
-            return redirect('/admin/dashboard');
-        }
+    public function showLoginForm() {
+        if (Auth::check()) return redirect('/admin/dashboard');
         return view('auth.login');
     }
 
-    // Handle the login logic
-    public function login(Request $request)
-    {
+    public function login(Request $request) {
         $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
+            'email' => 'required|email',
+            'password' => 'required',
         ]);
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-
             return redirect()->intended('/admin/dashboard');
         }
 
-        return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
-        ])->onlyInput('email');
+        return back()->withErrors(['email' => __('auth.failed')])->onlyInput('email');
     }
 
-    // Handle logout
-    public function logout(Request $request)
-    {
+    public function logout(Request $request) {
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();

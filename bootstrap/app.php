@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\IsAdmin;
 use App\Http\Middleware\Localization;
+use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -16,13 +17,13 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->alias([
-            'admin' =>IsAdmin::class,
-            'localize' =>Localization::class,
+        $middleware->web(append: [
+            SetLocale::class,
         ]);
-        
-        // Apply localization middleware to all routes
-        $middleware->append(Localization::class);
+
+        $middleware->alias([
+            'admin' => IsAdmin::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Handle ModelNotFoundException
@@ -31,7 +32,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 'message' => 'Resource not found'
             ], 404);
         });
-        
+
         // Handle general NotFoundHttpException
         $exceptions->render(function (NotFoundHttpException $e) {
             return response()->json([
