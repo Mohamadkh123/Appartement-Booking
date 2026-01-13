@@ -8,7 +8,6 @@ use App\Http\Resources\ApartmentResource;
 use App\Http\Resources\BookingResource;
 use App\Models\Apartment;
 use App\Models\ApartmentImage;
-use App\Notifications\ApartmentActivity;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -86,9 +85,6 @@ class ApartmentController extends BaseController
                 }
             }
 
-            // Send notification about new apartment
-            $user->notify(new ApartmentActivity('new_apartment', $apartment->id, $user->id));
-
             // Load relationships
             $apartment->load(['owner', 'images']);
 
@@ -134,8 +130,7 @@ class ApartmentController extends BaseController
                 'title', 'description', 'price', 'province', 'city', 'features', 'status'
             ]));
 
-            // Send notification about apartment update
-            $request->user()->notify(new ApartmentActivity('update_apartment', $apartment->id, $request->user()->id));
+          
 
             // Load relationships
             $apartment->load(['owner', 'images']);
@@ -315,8 +310,7 @@ class ApartmentController extends BaseController
                 'total_price' => $totalPrice
             ]);
 
-            // Send notification to tenant about the booking
-            $user->notify(new ApartmentActivity('booking', $apartment->id, $user->id));
+            
 
             // Load relationships
             $booking->load(['user', 'apartment']);

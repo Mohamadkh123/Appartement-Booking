@@ -85,8 +85,7 @@ class BookingController extends BaseController
                 'total_price' => $totalPrice
             ]);
 
-            // Send notification to tenant about the booking
-            $user->notify(new ApartmentActivity('booking', $request->apartment_id, $user->id));
+          
 
             // Load relationships
             $booking->load(['user', 'apartment']);
@@ -170,8 +169,6 @@ class BookingController extends BaseController
                     // Update booking status
                     $booking->update(['status' => $request->status]);
                                 
-                    // Send notification to the booking user
-                    $booking->user->notify(new BookingStatusChanged($booking, $request->status));
                                 
                     DB::commit();
                 } catch (Exception $e) {
@@ -182,8 +179,6 @@ class BookingController extends BaseController
                 // For other status updates (rejected), just update status
                 $booking->update(['status' => $request->status]);
                 
-                // Send notification to the booking user
-                $booking->user->notify(new BookingStatusChanged($booking, $request->status));
             }
 
             // Load relationships
@@ -242,8 +237,6 @@ class BookingController extends BaseController
                 }
             }
             
-            // Send notification to tenant about the cancellation
-            $tenant->notify(new ApartmentActivity('cancellation', $apartment->id, $tenant->id));
             
             // Load relationships
             $booking->load(['user', 'apartment']);
