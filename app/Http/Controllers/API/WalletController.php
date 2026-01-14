@@ -5,7 +5,6 @@ namespace App\Http\Controllers\API;
 
 use App\Models\User;
 use App\Models\Wallet;
-use App\Models\WithdrawalRequest;
 use Illuminate\Http\Request;
 use Exception;
 

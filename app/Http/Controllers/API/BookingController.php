@@ -8,8 +8,6 @@ use App\Http\Resources\BookingResource;
 use App\Models\Booking;
 use App\Models\Apartment;
 use App\Models\Wallet;
-use App\Notifications\ApartmentActivity;
-use App\Notifications\BookingStatusChanged;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Exception;

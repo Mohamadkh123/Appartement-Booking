@@ -5,9 +5,7 @@ use App\Http\Controllers\API\RegisterController;
 use App\Http\Controllers\API\ApartmentController;
 use App\Http\Controllers\API\BookingController;
 use App\Http\Controllers\API\ReviewController;
-use App\Http\Controllers\API\MessageController;
 use App\Http\Controllers\API\WalletController;
-use App\Http\Controllers\API\NotificationController;
 use App\Http\Controllers\API\FcmTokenController;
 
 
@@ -59,7 +57,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/reviews', [ReviewController::class, 'index']); // List all reviews (with filters)
     
     
-    // Notification Routes
-    Route::get('/notifications', [NotificationController::class, 'index']); // Get user's notifications
-    Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead']); // Mark notification as read
+    
 });

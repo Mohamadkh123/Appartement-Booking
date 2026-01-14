@@ -49,7 +49,8 @@ class ApartmentController extends BaseController
             $query->where('status', $request->status);
         }
 
-        $apartments = $query->paginate(10);
+         $perPage = $request->query('per_page', 10);
+         $apartments = $query->paginate($perPage);
 
         // Return paginated response
         return $this->sendPaginatedResponse($apartments, 'Apartments retrieved',200);
@@ -121,7 +122,9 @@ class ApartmentController extends BaseController
             'province' => 'sometimes|string|max:100',
             'city' => 'sometimes|string|max:100',
             'features' => 'nullable|array',
-            'status' => 'sometimes|in:available,booked,maintenance'
+            'status' => 'sometimes|in:available,booked,maintenance',
+            'images' => 'nullable|array',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 
         try {
@@ -130,7 +133,23 @@ class ApartmentController extends BaseController
                 'title', 'description', 'price', 'province', 'city', 'features', 'status'
             ]));
 
-          
+            // Handle image updates - Replace existing images with new ones
+            if ($request->hasFile('images')) {
+                // Delete existing images from storage and database
+                foreach ($apartment->images as $existingImage) {
+                    Storage::disk('public')->delete($existingImage->image_path);
+                    $existingImage->delete();
+                }
+                
+                // Upload and save new images
+                foreach ($request->file('images') as $image) {
+                    $imagePath = $image->store('apartment_images', 'public');
+                    ApartmentImage::create([
+                        'apartment_id' => $apartment->id,
+                        'image_path' => $imagePath
+                    ]);
+                }
+            }
 
             // Load relationships
             $apartment->load(['owner', 'images']);

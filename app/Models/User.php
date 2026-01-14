@@ -7,7 +7,10 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\Wallet;
-use App\Models\Notification;
+
+
+
+
 
 class User extends Authenticatable
 {
@@ -28,7 +31,8 @@ class User extends Authenticatable
         'status',
         'mobile',
         'profile_image',
-        'id_image'
+        'id_image',
+        'fcm_token',
     ];
 
     /**
@@ -62,66 +66,27 @@ class User extends Authenticatable
         return $this->role === 'admin';
     }
 
-    
-      
-     
     public function isTenant()
     {
         return $this->role === 'tenant';
     }
 
-    
-      
-     
     public function isRenter()
     {
         return $this->role === 'renter';
     }
 
-    
-     
-     
+
     public function isActive()
     {
         return $this->status === 'active';
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-      
      
     public function apartments()
     {
         return $this->hasMany(Apartment::class, 'owner_id');
     }
-
-    
-      
      
     public function bookings()
     {
@@ -129,51 +94,23 @@ class User extends Authenticatable
     }
 
     
-      
-     
     public function reviews()
     {
         return $this->hasMany(Review::class);
     }
 
     
-      
-     
     public function favorites()
     {
         return $this->hasMany(Favorite::class);
     }
 
-    
-     
-    public function sentMessages()
-    {
-        return $this->hasMany(Message::class, 'sender_id');
-    }
-
-    
-      
-     
-    public function receivedMessages()
-    {
-        return $this->hasMany(Message::class, 'receiver_id');
-    }
-
-    
-      
-     
     public function wallet()
     {
         return $this->hasOne(Wallet::class);
     }
         
-    /**
-     * Get the notifications for the user.
-     */
-    public function notifications()
-    {
-        return $this->hasMany(Notification::class);
-    }
+   
      
 
 }

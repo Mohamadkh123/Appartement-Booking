@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Http\Requests\RegisterRequest;
 use Exception;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
