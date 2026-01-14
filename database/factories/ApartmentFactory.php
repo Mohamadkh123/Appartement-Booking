@@ -21,7 +21,7 @@ class ApartmentFactory extends Factory
         // $cities = ['Damascus', 'Aleppo', 'Homs', 'Latakia', 'Tartous'];
         // $features = ['wifi', 'parking', 'ac', 'kitchen', 'balcony', 'pool'];
 
-        // // Randomly select features
+       
         // $selectedFeatures = array_slice($features, 0, rand(1, count($features)));
 
         return [

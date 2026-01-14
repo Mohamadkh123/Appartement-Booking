@@ -20,6 +20,11 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('apartment_id')->constrained('apartments')->cascadeOnDelete();
             $table->timestamps();
+
+         // Add indexes for better query performance
+            $table->index(['apartment_id', 'status']);
+            $table->index('start_date');
+            $table->index('end_date');
         });
     }
 

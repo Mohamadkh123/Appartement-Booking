@@ -20,6 +20,13 @@ class ApartmentController extends BaseController
      
     public function index(Request $request)
     {
+       
+
+        // Check if user is tenant 
+        if (!$request->user()->isTenant()) {
+            return $this->sendError('Only tenants can view apartment listings', [], 403);
+        }
+
         $query = Apartment::with(['owner', 'images']);
 
         // Apply filters
