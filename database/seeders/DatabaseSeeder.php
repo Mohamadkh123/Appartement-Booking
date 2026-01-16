@@ -14,7 +14,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        
+
         // Check if admin user already exists before creating
         if (!User::where('email', 'mohamadkhallouff@gmail.com')->exists()) {
             User::factory()->create([
@@ -23,8 +23,8 @@ class DatabaseSeeder extends Seeder
                 'email' => 'mohamadkhallouff@gmail.com',
                 'mobile' => '0987654321',
                 'date_of_birth' => '2002-02-17',
-                'role' => 'admin',
-                'status' => 'active',
+                'role' => 'owner',
+                'status' => 'pending',
                 'password' => Hash::make('mohamad123'),
             ]);
               User::factory()->create([
@@ -33,8 +33,8 @@ class DatabaseSeeder extends Seeder
                 'email' => 'ghina@gmail.com',
                 'mobile' => '0987654325',
                 'date_of_birth' => '2005-06-25',
-                'role' => 'owner',
-                'status' => 'pending',
+                'role' => 'admin',
+                'status' => 'active',
                 'password' => Hash::make('12345678'),
             ]);
 
@@ -50,9 +50,9 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        
-        
-        
+
+
+
         $this->call(ApartmentsTableSeeder::class);
     }
 }

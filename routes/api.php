@@ -23,10 +23,10 @@ Route::middleware('auth:sanctum')->group(function () {
     // FCM Token Routes
     Route::post('/store-fcm-token', [FcmTokenController::class, 'store']);// Store FCM token
     Route::get('/get-fcm-token/{userId}', [FcmTokenController::class, 'getToken']);// Get FCM token by user ID
-    
+
     // Wallet Routes (Accessible to all authenticated users)
     Route::get('/wallet/balance/{user}', [WalletController::class, 'balance']); // Get wallet balance
-    
+
     // Public Apartment Routes (Accessible to all authenticated users)
     Route::get('/apartments', [ApartmentController::class, 'index']); // List all apartments
     Route::get('/apartments/{apartment}', [ApartmentController::class, 'show']); // Show specific apartment
@@ -34,15 +34,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Apartment Management Routes (Owner/Renter only)
     Route::post('/apartments', [ApartmentController::class, 'store']); // Create new apartment
-    Route::put('/apartments/{apartment}', [ApartmentController::class, 'update']); // Update existing apartment
+    Route::post('/apartments/{apartment}', [ApartmentController::class, 'update']); // Update existing apartment
     Route::delete('/apartments/{apartment}', [ApartmentController::class, 'destroy']); // Delete apartment
-    
+
     // Favorite Apartment Routes
     Route::post('/apartments/{apartment}/favorite', [ApartmentController::class, 'addToFavorites']); // Add apartment to favorites
     Route::delete('/apartments/{apartment}/favorite', [ApartmentController::class, 'removeFromFavorites']); // Remove apartment from favorites
     Route::get('/favorites', [ApartmentController::class, 'favorites']); // List user's favorite apartments
     Route::post('/favorites/{apartment}/book', [ApartmentController::class, 'bookFromFavorites']); // Book apartment from favorites list
-    
+
     // Booking Routes
     Route::post('/bookings', [BookingController::class, 'store']); // Create new booking
     Route::get('/bookings', [BookingController::class, 'index']); // List all bookings (with filters)
@@ -51,11 +51,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/bookings/{booking}/details', [BookingController::class, 'updateDetails']); // Update booking details (user)
     Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancel']); // Cancel booking (user)
     Route::get('/my-bookings', [BookingController::class, 'myBookings']); // List current user's bookings
-        
+
     // Review Routes
     Route::post('/reviews', [ReviewController::class, 'store']); // Create/update review
     Route::get('/reviews', [ReviewController::class, 'index']); // List all reviews (with filters)
-    
-    
-    
+
+
+
 });

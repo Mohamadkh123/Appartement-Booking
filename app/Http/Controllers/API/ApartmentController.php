@@ -15,14 +15,14 @@ use Illuminate\Support\Facades\Storage;
 
 class ApartmentController extends BaseController
 {
-    
+
       //Display a listing of the resource.
-     
+
     public function index(Request $request)
     {
-       
 
-        // Check if user is tenant 
+
+        // Check if user is tenant
         if (!$request->user()->isTenant()) {
             return $this->sendError('Only tenants can view apartment listings', [], 403);
         }
@@ -63,9 +63,9 @@ class ApartmentController extends BaseController
         return $this->sendPaginatedResponse($apartments, 'Apartments retrieved',200);
     }
 
-    
+
      //Store a newly created resource in storage.
-     
+
     public function store(StoreApartmentRequest $request)
     {
         try {
@@ -104,7 +104,7 @@ class ApartmentController extends BaseController
 }
     }
 
-    
+
     public function show(Apartment $apartment)
     {
         // Load relationships
@@ -112,17 +112,16 @@ class ApartmentController extends BaseController
         return $this->sendResponse(new ApartmentResource($apartment), 'Apartment retrieved',200);
     }
 
-    
+
        //Update the specified resource in storage.
-     
+
     public function update(Request $request, Apartment $apartment)
     {
-        // Check ownership
         if ($request->user()->id !== $apartment->owner_id) {
-            return $this->sendError('Unauthorized',[],401);
+            return $this->sendError('Unauthorized', [], 401);
         }
 
-        $request->validate([
+        $validated = $request->validate([
             'title' => 'sometimes|string|max:255',
             'description' => 'sometimes|string',
             'price' => 'sometimes|numeric|min:0',
@@ -130,47 +129,49 @@ class ApartmentController extends BaseController
             'city' => 'sometimes|string|max:100',
             'features' => 'nullable|array',
             'status' => 'sometimes|in:available,booked,maintenance',
-            'images' => 'nullable|array',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048'
+            'images' => 'nullable',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         try {
-            // Update apartment with provided fields
-            $apartment->update($request->only([
-                'title', 'description', 'price', 'province', 'city', 'features', 'status'
-            ]));
+            // Update apartment fields
+            $apartment->update($validated);
 
-            // Handle image updates - Replace existing images with new ones
+            // Update images if provided
             if ($request->hasFile('images')) {
-                // Delete existing images from storage and database
-                foreach ($apartment->images as $existingImage) {
-                    Storage::disk('public')->delete($existingImage->image_path);
-                    $existingImage->delete();
+
+                foreach ($apartment->images as $image) {
+                    Storage::disk('public')->delete($image->image_path);
                 }
-                
-                // Upload and save new images
+
+                $apartment->images()->delete();
+
                 foreach ($request->file('images') as $image) {
-                    $imagePath = $image->store('apartment_images', 'public');
-                    ApartmentImage::create([
-                        'apartment_id' => $apartment->id,
-                        'image_path' => $imagePath
+                    $path = $image->store('apartment_images', 'public');
+                    $apartment->images()->create([
+                        'image_path' => $path
                     ]);
                 }
             }
 
-            // Load relationships
             $apartment->load(['owner', 'images']);
 
-            return $this->sendResponse(new ApartmentResource($apartment), 'Apartment updated',200);
-        } catch (Exception $e) {
-            // Handle update errors
-            return $this->sendError('Apartment update failed', ['error' => $e->getMessage()],500);
+            return $this->sendResponse(
+                new ApartmentResource($apartment),
+                'Apartment updated',
+                200
+            );
+        } catch (\Throwable $e) {
+            return $this->sendError(
+                'Apartment update failed',
+                ['error' => $e->getMessage()],
+                500
+            );
         }
     }
 
-    
      //Remove the specified resource from storage.
-     
+
     public function destroy(Request $request, Apartment $apartment)
     {
         // Check ownership or admin privileges
@@ -195,21 +196,21 @@ class ApartmentController extends BaseController
                  }
                 }
 
-    
+
       //Add apartment to favorites
-     
+
     public function addToFavorites(Request $request, Apartment $apartment)
     {
         $user = $request->user();
-        
+
         // Check if user is tenant
         if (!$user->isTenant()) {
             return $this->sendError('Only tenants can add apartments to favorites', [], 403);
         }
-        
+
         // Check if already favorited
         $favorite = $user->favorites()->where('apartment_id', $apartment->id)->first();
-        
+
         if ($favorite) {
             return $this->sendError('Apartment already added to favorites', [], 400);
         } else {
@@ -218,21 +219,21 @@ class ApartmentController extends BaseController
             return $this->sendResponse([], 'Apartment added to favorites',200);
         }
     }
-    
+
       //Remove apartment from favorites
-     
+
     public function removeFromFavorites(Request $request, Apartment $apartment)
     {
         $user = $request->user();
-        
+
         // Check if user is tenant
         if (!$user->isTenant()) {
             return $this->sendError('Only tenants can remove apartments from favorites', [], 403);
         }
-        
+
         // Check if already favorited
         $favorite = $user->favorites()->where('apartment_id', $apartment->id)->first();
-        
+
         if (!$favorite) {
             return $this->sendError('Apartment already removed from favorites', [], 400);
         } else {
@@ -242,9 +243,9 @@ class ApartmentController extends BaseController
         }
     }
 
-    
+
       //Get user's favorite apartments
-     
+
     public function favorites(Request $request)
     {
         $favorites = $request->user()
@@ -259,32 +260,32 @@ class ApartmentController extends BaseController
         return $this->sendPaginatedResponse($favorites, 'favorites retrieved',200);
     }
 
-    
+
     /**
      * Book an apartment from the favorites list
      */
     public function bookFromFavorites(Request $request, Apartment $apartment)
     {
         $user = $request->user();
-        
+
         // Check if user is tenant
         if (!$user->isTenant()) {
             return $this->sendError('Only tenants can book apartments from favorites', [], 403);
         }
-        
+
         // Check if apartment is in user's favorites
         $favorite = $user->favorites()->where('apartment_id', $apartment->id)->first();
-        
+
         if (!$favorite) {
             return $this->sendError('This apartment is not in your favorites list', [], 404);
         }
-        
+
         // Validate booking request data
         $request->validate([
             'start_date' => 'required|date|after_or_equal:today',
             'end_date' => 'required|date|after:start_date',
         ]);
-        
+
         // Check for overlapping bookings
         $existingBooking = $apartment->bookings()
             ->where('status', '!=', 'cancelled')
@@ -303,11 +304,11 @@ class ApartmentController extends BaseController
                     });
             })
             ->first();
-        
+
         if ($existingBooking) {
             return $this->sendError('This apartment is already booked for the selected dates', [], 400);
         }
-        
+
         try {
             // Calculate total price based on days
             $startDate = Carbon::parse($request->start_date);
@@ -336,7 +337,7 @@ class ApartmentController extends BaseController
                 'total_price' => $totalPrice
             ]);
 
-            
+
 
             // Load relationships
             $booking->load(['user', 'apartment']);

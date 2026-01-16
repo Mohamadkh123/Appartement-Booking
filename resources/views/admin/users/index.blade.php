@@ -44,10 +44,12 @@
                                 </form>
                             @endif
 
-                            <!-- Wallet Deposit Button -->
-                            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#depositModal{{ $user->id }}">
-                                {{ __('messages.deposit') }}
-                            </button>
+                            @if($user->status == 'active')
+                                <!-- Wallet Deposit Button -->
+                                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#depositModal{{ $user->id }}">
+                                    {{ __('messages.deposit') }}
+                                </button>
+                            @endif
                         </div>
 
                         <!-- Deposit Modal -->
