@@ -6,9 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+    
     public function up(): void
     {
         Schema::create('favorites', function (Blueprint $table) {
@@ -17,14 +15,11 @@ return new class extends Migration
             $table->foreignId('apartment_id')->constrained('apartments')->cascadeOnDelete();
             $table->timestamps();
 
-            // Ensure a user can only favorite an apartment once
             $table->unique(['user_id', 'apartment_id']);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
+    
     public function down(): void
     {
         Schema::dropIfExists('favorites');

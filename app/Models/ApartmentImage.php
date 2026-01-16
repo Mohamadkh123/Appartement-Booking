@@ -20,7 +20,6 @@ class ApartmentImage extends Model
     ];
 
     
-      //Get the apartment that owns the image
      
     public function apartment()
     {

@@ -17,20 +17,17 @@ class RegisterController extends BaseController
     public function register(RegisterRequest $request)
     {
         try {
-            // Handle ID image upload
             $idImagePath = null;
             if ($request->hasFile('id_image')) {
                 $idImagePath = $request->file('id_image')->store('id_images', 'public');
             }
 
            
-            // Handle profile image upload
             $profileImagePath = null;
             if ($request->hasFile('profile_image')) {
                 $profileImagePath = $request->file('profile_image')->store('profile_images', 'public');
             }
             
-            // Create user with pending status
             $user = User::create([
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
@@ -39,15 +36,13 @@ class RegisterController extends BaseController
                 'password' => Hash::make($request->password),
                 'mobile' => $request->mobile,
                 'role' => $request->role,
-                'status' => 'pending', // Default status is pending until admin approval
+                'status' => 'pending', 
                 'id_image' => $idImagePath,
                 'profile_image' => $profileImagePath
             ]);
             
-            // Create token for the user and include it in the response
             $token=$user->createToken('MyApp')->plainTextToken;
             
-            // Return user details with the token
             $success['token'] =  $token;
             $success['first_name'] =  $user->first_name;
             $success['last_name'] =  $user->last_name;
@@ -71,20 +66,16 @@ class RegisterController extends BaseController
             'password' => 'required|string'
         ]);
 
-        // Find user by mobile
         $user = User::where('mobile', $request->mobile)->first();
 
-        // Check if user exists and password is correct
         if (!$user || !Hash::check($request->password, $user->password)) {
             return $this->sendError('Mobile number or password is incorrect', [],401);
         }
 
-        // Check if user account is active
         if ($user->status !== 'active') {
             return $this->sendError('Your account is not active, please wait for admin approval', [],403);
         }
 
-        // Create token for the user
         $success['token'] =  $user->createToken('MyApp')->plainTextToken;
         $success['first_name'] =  $user->first_name;
         $success['last_name'] =  $user->last_name;
@@ -95,13 +86,11 @@ class RegisterController extends BaseController
     }
 
     
-      //Get user profile
      
     public function profile(Request $request)
     {
         $user = $request->user();
         
-        // Add full URLs to images if they exist
         $userData = $user->toArray();
         if ($user->id_image) {
             $userData['id_image_url'] = asset('storage/' . $user->id_image);
@@ -114,7 +103,6 @@ class RegisterController extends BaseController
     }
 
     
-      //Update user profile
      
     public function updateProfile(Request $request)
     {
@@ -130,9 +118,7 @@ class RegisterController extends BaseController
         ]);
 
         try {
-            // Handle profile image upload
             if ($request->hasFile('profile_image')) {
-                // Delete old profile image if exists
                 if ($user->profile_image) {
                     Storage::disk('public')->delete($user->profile_image);
                 }
@@ -141,7 +127,6 @@ class RegisterController extends BaseController
                 $user->profile_image = $profileImagePath;
             }
 
-            // Update other fields if provided
             if ($request->has('first_name')) {
                 $user->first_name = $request->first_name;
             }
@@ -164,7 +149,6 @@ class RegisterController extends BaseController
 
             $user->save();
 
-            // Add full URLs to images if they exist
             $userData = $user->toArray();
             if ($user->id_image) {
                 $userData['id_image_url'] = asset('storage/' . $user->id_image);
@@ -180,12 +164,10 @@ class RegisterController extends BaseController
     }
     
     
-     //Logout api
      
     public function logout(Request $request)
     {
         try {
-            // Revoke the current user's token
             $request->user()->currentAccessToken()->delete();
 
             return $this->sendResponse([], 'Logout success',200);

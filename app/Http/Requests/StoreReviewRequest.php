@@ -29,12 +29,7 @@ class StoreReviewRequest extends FormRequest
         ];
     }
 
-    /**
-     * Configure the validator instance.
-     *
-     * @param  \Illuminate\Validation\Validator  $validator
-     * @return void
-     */
+    
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
@@ -44,9 +39,7 @@ class StoreReviewRequest extends FormRequest
         });
     }
 
-    /**
-     * Check if the user has a completed booking for this apartment
-     */
+    
     private function hasCompletedBooking(): bool
     {
         if (!$this->user() || !$this->apartment_id) {

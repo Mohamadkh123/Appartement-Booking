@@ -34,7 +34,7 @@ namespace App\Models{
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Review> $reviews
  * @property-read int|null $reviews_count
  * @method static \Database\Factories\ApartmentFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Apartment hasFeatures($features)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Apartment hasFeatures(array $features)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Apartment inCity($city)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Apartment inProvince($province)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Apartment newModelQuery()

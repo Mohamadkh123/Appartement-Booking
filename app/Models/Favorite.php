@@ -20,7 +20,6 @@ class Favorite extends Model
     ];
 
     
-     //Get the user that favorited the apartment
      
     public function user()
     {
@@ -28,7 +27,6 @@ class Favorite extends Model
     }
 
     
-      //Get the apartment that was favorited
      
     public function apartment()
     {

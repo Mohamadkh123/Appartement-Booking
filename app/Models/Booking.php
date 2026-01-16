@@ -35,7 +35,6 @@ class Booking extends Model
     ];
 
     
-     // Get the user that made the booking
      
     public function user()
     {
@@ -43,7 +42,6 @@ class Booking extends Model
     }
 
     
-      //Get the apartment that was booked
      
     public function apartment()
     {

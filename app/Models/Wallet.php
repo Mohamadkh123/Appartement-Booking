@@ -28,9 +28,7 @@ class Wallet extends Model
         'balance' => 'string'
     ];
 
-    /**
-     * Get the user that owns the wallet.
-     */
+    
     public function user()
     {
         return $this->belongsTo(User::class);

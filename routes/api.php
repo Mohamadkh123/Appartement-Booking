@@ -9,52 +9,42 @@ use App\Http\Controllers\API\WalletController;
 use App\Http\Controllers\API\FcmTokenController;
 
 
-// Authentication Routes
-Route::post('/register', [RegisterController::class, 'register']); // Register new user
-Route::post('/login', [RegisterController::class, 'login']); // Login existing user
+Route::post('/register', [RegisterController::class, 'register']); 
+Route::post('/login', [RegisterController::class, 'login']); 
 
-// Protected Routes (Require Authentication)
 Route::middleware('auth:sanctum')->group(function () {
-    // User Profile Routes
-    Route::get('/user', [RegisterController::class, 'profile']); // Get authenticated user profile
-    Route::put('/user', [RegisterController::class, 'updateProfile']); // Update authenticated user profile
-    Route::post('/logout', [RegisterController::class, 'logout']); // Logout authenticated user
+    Route::get('/user', [RegisterController::class, 'profile']); 
+    Route::put('/user', [RegisterController::class, 'updateProfile']); 
+    Route::post('/logout', [RegisterController::class, 'logout']); 
 
-    // FCM Token Routes
-    Route::post('/store-fcm-token', [FcmTokenController::class, 'store']);// Store FCM token
-    Route::get('/get-fcm-token/{userId}', [FcmTokenController::class, 'getToken']);// Get FCM token by user ID
+    Route::post('/store-fcm-token', [FcmTokenController::class, 'store']);
+    Route::get('/get-fcm-token/{userId}', [FcmTokenController::class, 'getToken']);
 
-    // Wallet Routes (Accessible to all authenticated users)
-    Route::get('/wallet/balance/{user}', [WalletController::class, 'balance']); // Get wallet balance
+    Route::get('/wallet/balance/{user}', [WalletController::class, 'balance']); 
 
-    // Public Apartment Routes (Accessible to all authenticated users)
-    Route::get('/apartments', [ApartmentController::class, 'index']); // List all apartments
-    Route::get('/apartments/{apartment}', [ApartmentController::class, 'show']); // Show specific apartment
-    Route::get('/apartments/{apartment}/reviews', [ReviewController::class, 'apartmentReviews']); // Get reviews for specific apartment
+    Route::get('/apartments', [ApartmentController::class, 'index']); 
+    Route::get('/apartments/{apartment}', [ApartmentController::class, 'show']);
+    Route::get('/apartments/{apartment}/reviews', [ReviewController::class, 'apartmentReviews']); 
 
-    // Apartment Management Routes (Owner/Renter only)
-    Route::post('/apartments', [ApartmentController::class, 'store']); // Create new apartment
-    Route::post('/apartments/{apartment}', [ApartmentController::class, 'update']); // Update existing apartment
-    Route::delete('/apartments/{apartment}', [ApartmentController::class, 'destroy']); // Delete apartment
+    Route::post('/apartments', [ApartmentController::class, 'store']); 
+    Route::post('/apartments/{apartment}', [ApartmentController::class, 'update']); 
+    Route::delete('/apartments/{apartment}', [ApartmentController::class, 'destroy']); 
 
-    // Favorite Apartment Routes
-    Route::post('/apartments/{apartment}/favorite', [ApartmentController::class, 'addToFavorites']); // Add apartment to favorites
-    Route::delete('/apartments/{apartment}/favorite', [ApartmentController::class, 'removeFromFavorites']); // Remove apartment from favorites
-    Route::get('/favorites', [ApartmentController::class, 'favorites']); // List user's favorite apartments
-    Route::post('/favorites/{apartment}/book', [ApartmentController::class, 'bookFromFavorites']); // Book apartment from favorites list
+    Route::post('/apartments/{apartment}/favorite', [ApartmentController::class, 'addToFavorites']); 
+    Route::delete('/apartments/{apartment}/favorite', [ApartmentController::class, 'removeFromFavorites']);
+    Route::get('/favorites', [ApartmentController::class, 'favorites']); 
+    Route::post('/favorites/{apartment}/book', [ApartmentController::class, 'bookFromFavorites']); 
 
-    // Booking Routes
-    Route::post('/bookings', [BookingController::class, 'store']); // Create new booking
-    Route::get('/bookings', [BookingController::class, 'index']); // List all bookings (with filters)
-    Route::get('/bookings/{booking}', [BookingController::class, 'show']); // Show specific booking
-    Route::put('/bookings/{booking}', [BookingController::class, 'update']); // Update booking status (owner/admin) - includes modification approval
-    Route::put('/bookings/{booking}/details', [BookingController::class, 'updateDetails']); // Update booking details (user)
-    Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancel']); // Cancel booking (user)
-    Route::get('/my-bookings', [BookingController::class, 'myBookings']); // List current user's bookings
+    Route::post('/bookings', [BookingController::class, 'store']); 
+    Route::get('/bookings', [BookingController::class, 'index']); 
+    Route::get('/bookings/{booking}', [BookingController::class, 'show']); 
+    Route::put('/bookings/{booking}', [BookingController::class, 'update']); 
+    Route::put('/bookings/{booking}/details', [BookingController::class, 'updateDetails']);
+    Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancel']); 
+    Route::get('/my-bookings', [BookingController::class, 'myBookings']); 
 
-    // Review Routes
-    Route::post('/reviews', [ReviewController::class, 'store']); // Create/update review
-    Route::get('/reviews', [ReviewController::class, 'index']); // List all reviews (with filters)
+    Route::post('/reviews', [ReviewController::class, 'store']); 
+    Route::get('/reviews', [ReviewController::class, 'index']); 
 
 
 

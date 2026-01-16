@@ -32,30 +32,21 @@ class StoreBookingRequest extends FormRequest
         ];
     }
 
-    /**
-     * Configure the validator instance.
-     *
-     * @param  \Illuminate\Validation\Validator  $validator
-     * @return void
-     */
+    
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
-            // Check if dates overlap with existing bookings
             if ($this->isOverlapping()) {
                 $validator->errors()->add('start_date', 'The selected dates overlap with an existing booking.');
             }
             
-            // Check if apartment is available for booking
             if ($this->apartment_id && !$this->isApartmentAvailable()) {
                 $validator->errors()->add('apartment_id', 'The selected apartment is not available for booking.');
             }
         });
     }
 
-    /**
-     * Check if the requested dates overlap with existing bookings
-     */
+    
     private function isOverlapping(): bool
     {
         if (!$this->start_date || !$this->end_date || !$this->apartment_id) {
@@ -65,7 +56,6 @@ class StoreBookingRequest extends FormRequest
         $startDate = Carbon::parse($this->start_date);
         $endDate = Carbon::parse($this->end_date);
 
-        // Check for overlapping bookings (include pending bookings to prevent conflicts)
         $overlappingBookings = Booking::where('apartment_id', $this->apartment_id)
             ->whereIn('status', ['pending', 'confirmed'])
             ->where(function ($query) use ($startDate, $endDate) {
@@ -81,9 +71,7 @@ class StoreBookingRequest extends FormRequest
         return $overlappingBookings;
     }
 
-    /**
-     * Check if the apartment is available for booking
-     */
+    
     private function isApartmentAvailable(): bool
     {
         if (!$this->apartment_id) {
@@ -92,7 +80,6 @@ class StoreBookingRequest extends FormRequest
 
         $apartment = Apartment::find($this->apartment_id);
         
-        // Apartment must exist and be available
         return $apartment && $apartment->status === 'available';
     }
 
@@ -115,11 +102,7 @@ class StoreBookingRequest extends FormRequest
         ];
     }
 
-    /**
-     * Get the error message for authorization failure.
-     *
-     * @return string
-     */
+    
     public function forbiddenResponse()
     {
         return response()->json([

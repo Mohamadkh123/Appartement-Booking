@@ -6,9 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+   
     public function up(): void
     {
         Schema::create('bookings', function (Blueprint $table) {
@@ -21,16 +19,13 @@ return new class extends Migration
             $table->foreignId('apartment_id')->constrained('apartments')->cascadeOnDelete();
             $table->timestamps();
 
-         // Add indexes for better query performance
             $table->index(['apartment_id', 'status']);
             $table->index('start_date');
             $table->index('end_date');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
+    
     public function down(): void
     {
         Schema::dropIfExists('bookings');

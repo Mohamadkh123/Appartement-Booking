@@ -10,37 +10,26 @@ use Exception;
 
 class WalletController extends BaseController
 {
-    /**
-     * Deposit money into a tenant's wallet.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $userId
-     * @return \Illuminate\Http\JsonResponse
-     */
+    
     public function deposit(Request $request, $userId)
     {
         try {
-            // Validate request
             $request->validate([
                 'amount' => 'required|numeric|min:0.01'
             ]);
 
-            // Find user
             $user = User::findOrFail($userId);
 
-            // Ensure user is a tenant
             if (!$user->isTenant()) {
                 return $this->sendError('Only tenants can have wallet deposits', [], 400);
             }
 
-            // Create wallet if it doesn't exist
             $wallet = $user->wallet;
             if (!$wallet) {
                 $wallet = new Wallet(['user_id' => $user->id, 'balance' => 0]);
                 $user->wallet()->save($wallet);
             }
 
-            // Update balance
             $wallet->balance += $request->amount;
             $wallet->save();
 
@@ -53,20 +42,12 @@ class WalletController extends BaseController
         }
     }
 
-    /**
-     * Get wallet balance for a user.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $userId
-     * @return \Illuminate\Http\JsonResponse
-     */
+    
     public function balance(Request $request, $userId)
     {
         try {
-            // Find user
             $user = User::findOrFail($userId);
 
-            // Get wallet
             $wallet = $user->wallet;
             if (!$wallet) {
                 $wallet = new Wallet(['user_id' => $user->id, 'balance' => 0]);

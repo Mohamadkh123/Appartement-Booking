@@ -22,7 +22,6 @@ class Review extends Model
     ];
 
     
-     //Get the user that made the review
      
     public function user()
     {
@@ -30,7 +29,6 @@ class Review extends Model
     }
 
     
-      //Get the apartment that was reviewed
      
     public function apartment()
     {

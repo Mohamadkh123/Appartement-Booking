@@ -16,23 +16,19 @@ use Illuminate\Support\Facades\DB;
 class BookingController extends BaseController
 {
     
-      //Display a listing of the resource.
      
     public function index(Request $request)
     {
         $query = Booking::with(['user', 'apartment']);
 
-        // Filter by user ID
         if ($request->has('user_id')) {
             $query->where('user_id', $request->user_id);
         }
 
-        // Filter by apartment ID
         if ($request->has('apartment_id')) {
             $query->where('apartment_id', $request->apartment_id);
         }
 
-        // Filter by status
         if ($request->has('status')) {
             $query->where('status', $request->status);
         }
@@ -43,11 +39,9 @@ class BookingController extends BaseController
       }
 
     
-      //Store a newly created resource in storage.
      
     public function store(StoreBookingRequest $request)
     {
-        // Only tenants can book apartments
         if (!$request->user()->isTenant()) {
             return $this->sendError('Only tenants can book apartments', [],403);
         }
@@ -56,25 +50,21 @@ class BookingController extends BaseController
             $user = $request->user();
             $apartment = Apartment::findOrFail($request->apartment_id);
 
-            // Calculate total price based on days
             $startDate = Carbon::parse($request->start_date);
             $endDate = Carbon::parse($request->end_date);
             $days = $startDate->diffInDays($endDate);
             $totalPrice = (float)($days * $apartment->price);
 
-            // Check if tenant has a wallet
             $tenantWallet = $user->wallet;
             if (!$tenantWallet) {
                 return $this->sendError('You do not have money in your wallet. ', [],400);
             }
 
-            // Check if tenant has sufficient balance
             $currentBalance = (float)($tenantWallet->balance ?? 0);
             if ($currentBalance < $totalPrice) {
                 return $this->sendError("Insufficient balance in your wallet. Your balance: $" . number_format($currentBalance, 2) . ", Required: $" . number_format($totalPrice, 2), [],400);
             }
 
-            // Create booking with pending status
             $booking = $user->bookings()->create([
                 'apartment_id' => $request->apartment_id,
                 'start_date' => $request->start_date,
@@ -85,12 +75,10 @@ class BookingController extends BaseController
 
           
 
-            // Load relationships
             $booking->load(['user', 'apartment']);
 
             return $this->sendResponse(new BookingResource($booking), 'Booking created. Pending owner approval.',200);
         } catch (Exception $e) {
-            // Handle creation errors
             return $this->sendError('Booking creation failed', ['error' => $e->getMessage()],500);
         }
     }
@@ -100,24 +88,20 @@ class BookingController extends BaseController
      
     public function show(Booking $booking)
     {
-        // Load relationships
         $booking->load(['user', 'apartment']);
         return $this->sendResponse(new BookingResource($booking), 'Booking retrieved',200);
           }
 
     
-      //Update the specified resource in storage.
      
     public function update(Request $request, Booking $booking)
     {
         $user = $request->user();
 
-        // Check admin or owner permissions
         if (!$user->isAdmin() && $user->id !== $booking->apartment->owner_id) {
             return $this->sendError('Unauthorized',[], 403);
         }
         
-        // Check if booking has already been cancelled by tenant - if so, owner cannot change status
         if ($booking->status === 'cancelled') {
             return $this->sendError('Cannot update a booking that has been cancelled by the tenant', [],400);
         }
@@ -127,12 +111,10 @@ class BookingController extends BaseController
         ]);
 
         try {
-            // Handle booking confirmation for new bookings
             if ($request->status === 'confirmed' && $booking->status === 'pending') {
                 DB::beginTransaction();
                 
                 try {
-                    // Get tenant (booking user) wallet
                     $tenant = $booking->user;
                     $tenantWallet = $tenant->wallet;
                     
@@ -141,13 +123,11 @@ class BookingController extends BaseController
                         return $this->sendError('You do not have money in your wallet', [], 400);
                     }
 
-                    // Check if tenant has sufficient balance
                     if ((float)($tenantWallet->balance ?? 0) < (float)($booking->total_price ?? 0)) {
                         DB::rollBack();
                         return $this->sendError('Insufficient balance in tenant wallet. Balance: $' . number_format($tenantWallet->balance ?? 0, 2) . ', Required: $' . number_format($booking->total_price ?? 0, 2),[], 400);
                     }
 
-                    // Get owner (apartment owner) wallet or create one
                     $renter = $booking->apartment->owner;
                     $renterWallet = $renter->wallet;
                     
@@ -156,15 +136,12 @@ class BookingController extends BaseController
                         $renter->wallet()->save($renterWallet);
                     }
 
-                    // Deduct from tenant wallet
                     $tenantWallet->balance = (float)(($tenantWallet->balance ?? 0) - $booking->total_price);
                     $tenantWallet->save();
 
-                    // Add to renter wallet
                     $renterWallet->balance = (float)(($renterWallet->balance ?? 0) + $booking->total_price);
                     $renterWallet->save();
 
-                    // Update booking status
                     $booking->update(['status' => $request->status]);
                                 
                                 
@@ -174,12 +151,10 @@ class BookingController extends BaseController
                     return $this->sendError('Payment processing failed', ['error' => $e->getMessage()],500);
                 }
             } else {
-                // For other status updates (rejected), just update status
                 $booking->update(['status' => $request->status]);
                 
             }
 
-            // Load relationships
             $booking->load(['user', 'apartment']);
 
             return $this->sendResponse(new BookingResource($booking), 'Booking status updated',200);
@@ -189,54 +164,42 @@ class BookingController extends BaseController
     }
 
     
-      //Cancel a booking by user
      
     public function cancel(Request $request, Booking $booking)
     {
-        // Check if user owns the booking
         if ($request->user()->id !== $booking->user_id) {
             return $this->sendError('Unauthorized', [],401);
         }
 
-        // Check if booking is in pending or confirmed status (allow cancellation of both)
         if ($booking->status !== 'pending' && $booking->status !== 'confirmed') {
             return $this->sendError('Invalid action', [],400);
         }
 
         try {
-            // Get booking info before update for notification and potential refund
             $apartment = $booking->apartment;
             $tenant = $booking->user;
             $bookingStatus = $booking->status;
             $bookingTotalPrice = $booking->total_price;
             
-            // Update the booking status to cancelled
             $booking->update(['status' => 'cancelled']);
             
-            // If the booking was already confirmed, refund half the money to tenant's wallet
             if ($bookingStatus === 'confirmed') {
-                // Calculate half the booking amount
                 $refundAmount = (float)($bookingTotalPrice / 2);
                 
-                // Get tenant wallet
                 $tenantWallet = $tenant->wallet;
                 if ($tenantWallet) {
-                    // Add half the booking amount back to tenant's wallet
                     $tenantWallet->balance = (float)($tenantWallet->balance + $refundAmount);
                     $tenantWallet->save();
                 }
                 
-                // Get renter wallet and deduct the amount
                 $renterWallet = $apartment->owner->wallet;
                 if ($renterWallet) {
-                    // Deduct half the booking amount from renter's wallet
                     $renterWallet->balance = (float)($renterWallet->balance - $refundAmount);
                     $renterWallet->save();
                 }
             }
             
             
-            // Load relationships
             $booking->load(['user', 'apartment']);
             
             return $this->sendResponse(new BookingResource($booking), 'Booking cancelled',200);
@@ -245,32 +208,21 @@ class BookingController extends BaseController
         }
     }
 
-    /**
-     * Update the specified booking details in storage.
-     *
-     * @param  \App\Http\Requests\UpdateBookingRequest  $request
-     * @param  \App\Models\Booking  $booking
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function updateDetails(UpdateBookingRequest $request, Booking $booking)
+        public function updateDetails(UpdateBookingRequest $request, Booking $booking)
     {
-        // Check if booking has already been cancelled - if so, cannot update details
         if ($booking->status === 'cancelled') {
             return $this->sendError('Cannot update details of a cancelled booking', [],400);
         }
 
         try {
-            // Check if user owns the booking
             if ($request->user()->id !== $booking->user_id) {
                 return $this->sendError('Unauthorized', [],401);
             }
 
-            // Check if booking is in pending status only (prevent modification of confirmed bookings)
             if ($booking->status !== 'pending') {
                 return $this->sendError('Cannot modify a confirmed booking. You can only cancel it.', [],400);
             }
 
-            // Calculate total price based on days if dates are provided
             $totalPrice = $booking->total_price;
             if ($request->has('start_date') || $request->has('end_date')) {
                 $startDate = $request->has('start_date') ? Carbon::parse($request->start_date) : $booking->start_date;
@@ -279,13 +231,11 @@ class BookingController extends BaseController
                 $totalPrice = (float)($days * $booking->apartment->price);
             }
 
-            // For pending bookings, just update the details
             $booking->update(array_merge(
                 $request->only(['start_date', 'end_date']),
                 ['total_price' => $totalPrice, 'status' => $booking->status]
             ));
 
-            // Load relationships
             $booking->load(['user', 'apartment']);
 
             return $this->sendResponse(new BookingResource($booking), 'Booking updated',200);
@@ -295,7 +245,6 @@ class BookingController extends BaseController
     }
 
     
-      //Get current user's bookings
      
     public function myBookings(Request $request)
     {

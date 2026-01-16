@@ -36,7 +36,6 @@ class Apartment extends Model
     ];
 
 
-     // Get the owner of the apartment
 
     public function owner()
     {
@@ -44,7 +43,6 @@ class Apartment extends Model
     }
 
 
-      //Get all images for the apartment
 
     public function images()
     {
@@ -52,7 +50,6 @@ class Apartment extends Model
     }
 
 
-      //Get all bookings for the apartment
 
     public function bookings()
     {
@@ -60,7 +57,6 @@ class Apartment extends Model
     }
 
 
-      //Get all reviews for the apartment
 
     public function reviews()
     {
@@ -68,7 +64,6 @@ class Apartment extends Model
     }
 
 
-      //Get all favorites for the apartment
 
     public function favorites()
     {
@@ -76,7 +71,6 @@ class Apartment extends Model
     }
 
 
-      //Scope a query to only include apartments from a specific province
 
     public function scopeInProvince($query, $province)
     {
@@ -84,7 +78,6 @@ class Apartment extends Model
     }
 
 
-      //Scope a query to only include apartments from a specific city
 
     public function scopeInCity($query, $city)
     {
@@ -92,7 +85,6 @@ class Apartment extends Model
     }
 
 
-      //Scope a query to only include apartments within a price range
 
     public function scopePriceBetween($query, $min, $max)
     {
@@ -100,7 +92,6 @@ class Apartment extends Model
     }
 
 
-      //Scope a query to only include apartments with specific features
 
     public function scopeHasFeatures($query, array $features)
     {
